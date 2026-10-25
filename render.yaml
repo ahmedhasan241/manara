@@ -1,0 +1,70 @@
+# Render Blueprint: the Manara API (with WebSockets, queue and scheduler in one
+# container, see api/Dockerfile) and its Postgres database.
+# Render dashboard → New → Blueprint → pick this repository.
+services:
+  - type: web
+    name: manara-api
+    runtime: docker
+    rootDir: api
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    region: frankfurt
+    healthCheckPath: /up
+    envVars:
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_NAME
+        value: Manara
+      - key: APP_LOCALE
+        value: ar
+      - key: APP_FALLBACK_LOCALE
+        value: en
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_URL
+        fromDatabase:
+          name: manara-db
+          property: connectionString
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: MAIL_MAILER
+        value: log
+      - key: LOG_LEVEL
+        value: info
+      # Comma-separated web app addresses, filled in once Vercel has them.
+      - key: FRONTEND_URLS
+        sync: false
+      - key: LEARNER_URL
+        sync: false
+      - key: TENANT_ROOT_DOMAIN
+        value: manara.invalid
+      - key: BROADCAST_CONNECTION
+        value: reverb
+      - key: REVERB_APP_ID
+        value: "482913"
+      # Public: browsers receive this key too (NEXT_PUBLIC_REVERB_KEY on Vercel).
+      - key: REVERB_APP_KEY
+        value: 42e5b655e0e004d1bbdd
+      - key: REVERB_APP_SECRET
+        generateValue: true
+      - key: REVERB_HOST
+        value: 127.0.0.1
+      - key: REVERB_PORT
+        value: "6001"
+      - key: REVERB_SCHEME
+        value: http
+      - key: SEED_DEMO_DATA
+        value: "true"
+      - key: JITSI_DOMAIN
+        value: https://meet.jit.si
+
+databases:
+  - name: manara-db
+    databaseName: manara
+    plan: free
+    region: frankfurt

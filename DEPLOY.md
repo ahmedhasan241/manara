@@ -1,7 +1,7 @@
 # Deploying Manara
 
-- **API** (Laravel + WebSockets + queue + scheduler) → **Railway**, one service built from
-  `api/Dockerfile`, with a MySQL database and a volume for uploads.
+- **API** (Laravel + WebSockets + queue + scheduler) → **Render**, one Docker service built
+  from `api/Dockerfile`, with a Postgres database. Both are defined in `render.yaml`.
 - **Five web apps** (Next.js) → **Vercel**, one project each.
 
 Deploy the API first: the web apps need its address when they build.
@@ -15,59 +15,29 @@ git remote add origin https://github.com/<you>/manara.git
 git push -u origin main
 ```
 
-## 2. API on Railway
+## 2. API on Render
 
-1. railway.com → **New Project → Deploy from GitHub repo** → pick the repository.
-2. Open the new service → **Settings**:
-   - **Root Directory**: `/api` (Railway then finds `api/railway.json` and the Dockerfile)
-   - **Networking → Generate Domain** (port `8080`). Note it, e.g. `manara-api.up.railway.app`.
-3. In the project press **+ New → Database → MySQL**.
-4. On the API service: **+ Volume**, mount path `/app/storage` (keeps uploads and logs).
-5. API service → **Variables** (Raw editor), paste and fill in:
+1. dashboard.render.com → **New → Blueprint** → connect GitHub and pick the repository.
+   Render reads `render.yaml` and proposes `manara-api` (web service) and `manara-db` (Postgres).
+2. It asks for the two variables left blank; fill them once the Vercel addresses are known
+   (a placeholder like `https://example.com` is fine for the first deploy):
+   - `FRONTEND_URLS` — the five Vercel addresses, comma separated, no trailing slash
+   - `LEARNER_URL` — the learner portal address
+3. **Apply**. The first build takes about 10 minutes. When it's live,
+   `https://manara-api.onrender.com/up` (your service's address) shows a green page.
 
-```env
-APP_NAME=Manara
-APP_ENV=production
-APP_DEBUG=false
-APP_KEY=base64:...                     # run: php api/artisan key:generate --show
-APP_URL=https://manara-api.up.railway.app
-APP_LOCALE=ar
-APP_FALLBACK_LOCALE=en
-
-DB_CONNECTION=mysql
-DB_URL=${{MySQL.MYSQL_URL}}
-
-SESSION_DRIVER=database
-CACHE_STORE=database
-QUEUE_CONNECTION=database
-FILESYSTEM_DISK=local
-RECORDINGS_DISK=local
-MAIL_MAILER=log
-LOG_LEVEL=info
-
-# Web app addresses (fill in after step 3; comma separated, no trailing slash)
-FRONTEND_URLS=https://manara-marketing.vercel.app,https://manara-admin.vercel.app,https://manara-site.vercel.app,https://manara-portal.vercel.app,https://manara-learner.vercel.app
-LEARNER_URL=https://manara-learner.vercel.app
-TENANT_ROOT_DOMAIN=manara.invalid
-
-# WebSockets. The API talks to Reverb inside the container; browsers use the public domain.
-BROADCAST_CONNECTION=reverb
-REVERB_APP_ID=123456                   # any number
-REVERB_APP_KEY=<random 20 lowercase letters/digits>
-REVERB_APP_SECRET=<random 20 lowercase letters/digits>
-REVERB_HOST=127.0.0.1
-REVERB_PORT=6001
-REVERB_SCHEME=http
-
-# Seeds plans, the platform admin and the Greenwood demo school once.
-SEED_DEMO_DATA=true
-JITSI_DOMAIN=https://meet.jit.si
-```
-
-6. Deploy. When it's up, `https://<api-domain>/up` shows a green page.
+Everything else (app key, database URL, Reverb keys, seeding the demo data once) is
+set by the blueprint.
 
 > The demo accounts all use the password `password`. On a public site, sign in and
 > change them (or remove them) straight away.
+
+**Free plan:** the API sleeps after 15 minutes without visitors (the next request takes
+about a minute), the free database expires after 30 days, and uploaded files are lost on
+each deploy. For a permanent site switch the service to *Starter* and the database to a
+paid plan, and add a disk mounted at `/app/storage`.
+
+The same Docker image also runs on Railway (`api/railway.json`) or any Docker host.
 
 ## 3. Web apps on Vercel
 
@@ -86,20 +56,20 @@ Leave "Include files outside the root directory" on (the apps share `web/package
 Environment variables (same for all five; the `REVERB` ones matter only for the two portals):
 
 ```env
-API_URL=https://manara-api.up.railway.app
+API_URL=https://manara-api.onrender.com
 NEXT_PUBLIC_MARKETING_URL=https://manara-marketing.vercel.app
 NEXT_PUBLIC_STAFF_PORTAL_URL=https://manara-portal.vercel.app
 NEXT_PUBLIC_LEARNER_PORTAL_URL=https://manara-learner.vercel.app
 NEXT_PUBLIC_SCHOOL_SITE_URL=https://manara-site.vercel.app
 NEXT_PUBLIC_PORTAL_URL=https://manara-portal.vercel.app
-NEXT_PUBLIC_REVERB_KEY=<same as REVERB_APP_KEY>
-NEXT_PUBLIC_REVERB_HOST=manara-api.up.railway.app
+NEXT_PUBLIC_REVERB_KEY=42e5b655e0e004d1bbdd
+NEXT_PUBLIC_REVERB_HOST=manara-api.onrender.com
 NEXT_PUBLIC_REVERB_PORT=443
 NEXT_PUBLIC_REVERB_SCHEME=https
 ```
 
 If Vercel gives a project a different address than the suggested name, update these
-variables (and `FRONTEND_URLS` on Railway) and redeploy.
+variables (and `FRONTEND_URLS` on Render) and redeploy.
 
 The Greenwood demo school is then at `https://manara-site.vercel.app/greenwood`.
 
@@ -109,4 +79,4 @@ The Greenwood demo school is then at `https://manara-site.vercel.app/greenwood`.
   which accepts at most 4.5 MB per request. Use "Paste a link" for recordings, or Zoom
   cloud recording (see README), until uploads go straight to the API.
 - Mobile push needs Firebase (`FCM_PROJECT_ID`, `FCM_CREDENTIALS`) — optional.
-- Railway costs about $5/month for this setup; Vercel's Hobby plan is free.
+- Render's free plan limits are listed in step 2; Vercel's Hobby plan is free.
