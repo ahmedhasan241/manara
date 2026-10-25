@@ -1,0 +1,42 @@
+@import "tailwindcss";
+@import "@educloud/ui/theme.css";
+@source "../../../packages/ui/src";
+@source "../../../packages/portal-kit/src";
+
+/*
+ * Printable pages (the report card) mark their content with data-print-root:
+ * the shell's sidebar, top bar, banners and tab bar are left off the page.
+ */
+@media print {
+  body:has([data-print-root]) .app-canvas > aside,
+  body:has([data-print-root]) .app-canvas > div > :not(main),
+  body:has([data-print-root]) [data-bottom-bar] {
+    display: none !important;
+  }
+  body:has([data-print-root]) .app-canvas > div {
+    padding-inline-start: 0 !important;
+  }
+  body:has([data-print-root]) main {
+    max-width: none;
+    padding: 0;
+  }
+  body:has([data-print-root]),
+  body:has([data-print-root]) .app-canvas {
+    background: #fff !important;
+  }
+  [data-print-root] {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  [data-print-root] li {
+    break-inside: avoid;
+  }
+  /* Content that hasn't scrolled into view yet is still mid-animation. */
+  [data-print-root] * {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  [data-print-root] [data-meter-fill] {
+    width: var(--meter-width) !important;
+  }
+}

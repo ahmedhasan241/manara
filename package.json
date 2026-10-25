@@ -1,0 +1,13 @@
+{
+  "name": "manara",
+  "private": true,
+  "description": "Manara (منارة) — run the API and all web apps locally.",
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "dev": "node scripts/dev.mjs",
+    "test": "cd api && php artisan test && cd ../web && npm run typecheck"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

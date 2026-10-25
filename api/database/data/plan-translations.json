@@ -1,0 +1,173 @@
+{
+  "teacher": {
+    "ar": {
+      "name": "معلم",
+      "description": "لمعلم واحد وصفوفه.",
+      "features": [
+        "سجل الدرجات",
+        "الحضور",
+        "مواد المقرر",
+        "الإعلانات",
+        "تطبيق الجوال"
+      ]
+    },
+    "fr": {
+      "name": "Enseignant",
+      "description": "Pour un enseignant et ses classes.",
+      "features": [
+        "Carnet de notes",
+        "Présences",
+        "Supports de cours",
+        "Annonces",
+        "Appli mobile"
+      ]
+    },
+    "es": {
+      "name": "Profesor",
+      "description": "Para un docente y sus clases.",
+      "features": [
+        "Cuaderno de notas",
+        "Asistencia",
+        "Materiales del curso",
+        "Avisos",
+        "App móvil"
+      ]
+    },
+    "pt": {
+      "name": "Professor",
+      "description": "Para um educador e suas turmas.",
+      "features": [
+        "Diário de notas",
+        "Frequência",
+        "Materiais do curso",
+        "Avisos",
+        "App móvel"
+      ]
+    },
+    "zh": {
+      "name": "教师版",
+      "description": "适合一位教师和他的班级。",
+      "features": [
+        "成绩册",
+        "出勤",
+        "课程资料",
+        "公告",
+        "移动应用"
+      ]
+    }
+  },
+  "school": {
+    "ar": {
+      "name": "مدرسة",
+      "description": "للمدارس التي تضم معلمين كثيرين.",
+      "features": [
+        "كل ما في باقة المعلم",
+        "حسابات لأولياء الأمور",
+        "موقع عام للمدرسة",
+        "تقارير وتصدير",
+        "تحقق بخطوتين إلزامي"
+      ]
+    },
+    "fr": {
+      "name": "École",
+      "description": "Pour les écoles avec de nombreux enseignants.",
+      "features": [
+        "Tout de la formule Enseignant",
+        "Comptes parents",
+        "Site public de l’école",
+        "Rapports et exports",
+        "Double authentification obligatoire"
+      ]
+    },
+    "es": {
+      "name": "Escuela",
+      "description": "Para escuelas con muchos profesores.",
+      "features": [
+        "Todo lo del plan Profesor",
+        "Cuentas para familias",
+        "Web pública de la escuela",
+        "Informes y exportaciones",
+        "Verificación en dos pasos obligatoria"
+      ]
+    },
+    "pt": {
+      "name": "Escola",
+      "description": "Para escolas com muitos professores.",
+      "features": [
+        "Tudo do plano Professor",
+        "Contas para responsáveis",
+        "Site público da escola",
+        "Relatórios e exportações",
+        "Verificação em duas etapas obrigatória"
+      ]
+    },
+    "zh": {
+      "name": "学校版",
+      "description": "适合有很多教师的学校。",
+      "features": [
+        "包含教师版全部功能",
+        "家长账号",
+        "学校公开网站",
+        "报告和导出",
+        "强制双重验证"
+      ]
+    }
+  },
+  "university": {
+    "ar": {
+      "name": "جامعة",
+      "description": "للجامعات والمؤسسات الكبيرة.",
+      "features": [
+        "كل ما في باقة المدرسة",
+        "نطاق خاص",
+        "تسجيل دخول موحّد SSO",
+        "دعم مخصص",
+        "استضافة البيانات محليًا"
+      ]
+    },
+    "fr": {
+      "name": "Université",
+      "description": "Pour les universités et grandes institutions.",
+      "features": [
+        "Tout de la formule École",
+        "Domaine personnalisé",
+        "SSO",
+        "Support dédié",
+        "Hébergement localisé des données"
+      ]
+    },
+    "es": {
+      "name": "Universidad",
+      "description": "Para universidades e instituciones grandes.",
+      "features": [
+        "Todo lo del plan Escuela",
+        "Dominio propio",
+        "SSO",
+        "Soporte dedicado",
+        "Residencia de datos"
+      ]
+    },
+    "pt": {
+      "name": "Universidade",
+      "description": "Para universidades e grandes instituições.",
+      "features": [
+        "Tudo do plano Escola",
+        "Domínio próprio",
+        "SSO",
+        "Suporte dedicado",
+        "Residência de dados"
+      ]
+    },
+    "zh": {
+      "name": "大学版",
+      "description": "适合大学和大型机构。",
+      "features": [
+        "包含学校版全部功能",
+        "自定义域名",
+        "单点登录 SSO",
+        "专属支持",
+        "数据本地化存储"
+      ]
+    }
+  }
+}

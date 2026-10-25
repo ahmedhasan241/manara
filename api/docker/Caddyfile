@@ -1,0 +1,19 @@
+{
+	frankenphp
+	auto_https off
+	admin off
+}
+
+:{$PORT:8080} {
+	root * /app/public
+	encode zstd gzip
+	request_body {
+		max_size 1GB
+	}
+
+	# Reverb (WebSockets and its HTTP API) runs inside this container on 6001.
+	@reverb path /app/* /apps/*
+	reverse_proxy @reverb 127.0.0.1:6001
+
+	php_server
+}

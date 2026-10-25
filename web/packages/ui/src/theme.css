@@ -1,0 +1,634 @@
+/*
+ * Manara design tokens. Each app imports this after `@import "tailwindcss"`.
+ *
+ * One palette from the Manara logo (antique gold brand, navy ink and dark
+ * surfaces, warm cream bands, white cards) and one switch on <html>: `.dark`
+ * for dark mode. The gold steps used behind white text are deeper so labels
+ * stay readable. "Accent" and the old pastel tints resolve to the same family.
+ * Red ("live", danger) and green/amber (success/warning) are kept for meaning.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --font-sans: var(--font-poppins), var(--font-plex-arabic), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-poppins), var(--font-plex-arabic), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-hand: var(--font-poppins), var(--font-plex-arabic), sans-serif;
+
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+
+  --color-accent-400: var(--brand-400);
+  --color-accent-500: var(--brand-500);
+  --color-accent-600: var(--brand-600);
+
+  --color-nav: var(--nav);
+  --color-nav-2: var(--nav-2);
+  --color-nav-ink: var(--nav-ink);
+  --color-nav-muted: var(--nav-muted);
+  --color-heading: var(--heading);
+  --color-sky: var(--tint);
+  --color-peach: var(--tint);
+  --color-blush: var(--tint);
+  --color-mint: var(--tint);
+  --color-lilac: var(--tint);
+
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+
+  --shadow-soft: 0 1px 2px rgb(15 27 51 / 0.04), 0 8px 24px -12px rgb(15 27 51 / 0.14);
+  --shadow-lift: 0 2px 4px rgb(15 27 51 / 0.05), 0 18px 36px -18px rgb(15 27 51 / 0.25);
+  /* A soft gold halo under primary actions. */
+  --shadow-glow: 0 8px 20px -8px color-mix(in oklab, var(--brand-500) 60%, transparent);
+}
+
+@theme {
+  --color-live-400: #f0727a;
+  --color-live-500: #e5484d;
+  --color-live-600: #cd2b31;
+
+  --radius-card: 1rem;
+
+  /* A comfortable reading scale: 16px body, nothing below 12.5px. */
+  --text-xs: 0.78rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.375rem;
+  --text-3xl: 1.625rem;
+  --text-4xl: 2rem;
+  --text-5xl: 2.5rem;
+  --text-6xl: 3rem;
+
+  --animate-pulse-ring: pulse-ring 1.8s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+  --animate-aurora: aurora 18s ease-in-out infinite alternate;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-gradient-x: gradient-x 6s ease infinite;
+  --animate-spin-slow: spin 14s linear infinite;
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-fade-in: fade-in 0.15s ease-out;
+  --animate-pop-in: pop-in 0.14s ease-out;
+  --animate-slide-up: slide-up 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-slide-from-end: slide-from-end 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-slide-from-start: slide-from-start 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-expand: expand 0.2s ease-out;
+  --animate-collapse: collapse 0.2s ease-out;
+  --animate-wipe-in: wipe-in 0.9s cubic-bezier(0.65, 0, 0.35, 1) both;
+  --animate-rise-in: rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Phones: every Tailwind spacing step (padding, gaps, sizes) is ~12% tighter. */
+@media (max-width: 639px) {
+  :root {
+    --spacing: 0.22rem;
+  }
+}
+
+/* ---------- Colours ---------- */
+
+:root {
+  /* Manara gold. 600 and up carry white text (≥ 4.5:1); 300–500 are for accents. */
+  --brand-50: #fbf6ec; --brand-100: #f6ebd3; --brand-200: #eed8aa; --brand-300: #e4c07c; --brand-400: #d9ab55;
+  --brand-500: #c4913a; --brand-600: #9c6b1c; --brand-700: #7e5616; --brand-800: #614213; --brand-900: #48310f;
+  /* Manara navy, from the logo. */
+  --nav: #0f1b33; --nav-2: #172a4b; --nav-ink: #f4efe3; --nav-muted: #9aa5ba;
+  /* Old names some components still use; all the same gold. */
+  --accent-400: var(--brand-400); --accent-500: var(--brand-500); --accent-600: var(--brand-600); --gradient-mid: var(--brand-400);
+  --sky: var(--tint); --peach: var(--tint); --mint: var(--tint); --blush: var(--tint); --lilac: var(--tint);
+
+  --surface: #ffffff;
+  --surface-2: #f9f8f5;
+  --surface-3: #efece5;
+  --ink: #1f2a40;
+  --heading: #132544;
+  --ink-muted: #5c667a;
+  --line: #e7e3da;
+  --tint: #fbf4e6;
+  --success: #12805c;
+  --warning: #a35b06;
+  --danger: #c2333b;
+  color-scheme: light;
+}
+
+.dark {
+  --surface: #15233f;
+  --surface-2: #0e1930;
+  --surface-3: #1d2e4f;
+  --ink: #e6e9f0;
+  --heading: #f8f4ea;
+  --ink-muted: #9aa5ba;
+  --line: #243657;
+  --tint: #1e2a40;
+  --success: #3ccf91;
+  --warning: #f2b544;
+  --danger: #f2727a;
+  color-scheme: dark;
+}
+
+/* ---------- Keyframes ---------- */
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgb(255 90 95 / 0.55); }
+  80%, 100% { box-shadow: 0 0 0 10px rgb(255 90 95 / 0); }
+}
+
+@keyframes aurora {
+  0% { transform: translate3d(-8%, -6%, 0) rotate(0deg) scale(1); }
+  50% { transform: translate3d(6%, 4%, 0) rotate(8deg) scale(1.08); }
+  100% { transform: translate3d(-4%, 8%, 0) rotate(-6deg) scale(1.02); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+
+@keyframes gradient-x {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.97); }
+}
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+}
+/* "End" is the right edge in LTR and the left edge in RTL. */
+:root { --slide-end: 100%; }
+[dir="rtl"] { --slide-end: -100%; }
+@keyframes slide-from-end {
+  from { transform: translateX(var(--slide-end)); }
+}
+@keyframes slide-from-start {
+  from { transform: translateX(calc(var(--slide-end) * -1)); }
+}
+@keyframes expand {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+@keyframes collapse {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ---------- Base ---------- */
+
+/* In @layer base so utility classes (outline-none, bg-*) can override them. */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--surface-2);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    transition: background-color 0.4s ease, color 0.4s ease;
+  }
+
+  h1, h2, h3 {
+    color: var(--heading);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+    border-radius: 0.5rem;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--brand-500) 25%, transparent);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--ink-muted) 35%, transparent) transparent;
+  }
+}
+
+/* Fluid display sizes: comfortable on phones, dramatic on wide screens. */
+.text-display-xl { font-size: clamp(1.875rem, 1.45rem + 2vw, 3rem); line-height: 1.12; letter-spacing: -0.02em; }
+.text-display-lg { font-size: clamp(1.625rem, 1.35rem + 1.3vw, 2.375rem); line-height: 1.15; letter-spacing: -0.015em; }
+.text-display-md { font-size: clamp(1.375rem, 1.2rem + 0.8vw, 1.875rem); line-height: 1.2; letter-spacing: -0.01em; }
+
+/* App background: plain and warm, no texture (easier on the eyes for long sessions). */
+.app-canvas {
+  background: var(--surface-2);
+}
+
+/* Brand banner: Manara navy with a gold glow and a quiet dot texture, like the logo. */
+.banner-brand {
+  background:
+    radial-gradient(circle at 1px 1px, rgb(228 192 124 / 0.14) 1px, transparent 0) 0 0 / 18px 18px,
+    radial-gradient(120% 90% at 100% 0%, rgb(217 171 85 / 0.28), transparent 55%),
+    var(--nav-2);
+}
+.dark .banner-brand {
+  background:
+    radial-gradient(circle at 1px 1px, rgb(228 192 124 / 0.1) 1px, transparent 0) 0 0 / 18px 18px,
+    radial-gradient(120% 90% at 100% 0%, rgb(217 171 85 / 0.2), transparent 55%),
+    var(--nav);
+}
+
+/* Soft peach band for hero and feature sections. */
+.band-peach {
+  background: var(--tint);
+}
+
+/* Solid brand fill for small things (active menu item, pills, selected day). */
+.fill-brand {
+  background: var(--brand-600);
+}
+
+.glass {
+  background: color-mix(in oklab, var(--surface) 76%, transparent);
+  backdrop-filter: blur(18px) saturate(1.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+}
+
+/*
+ * Emphasis: the key word in gold with a hand-drawn swoosh underneath, as in
+ * "Education for the *Future*". (Kept under the old class names.)
+ */
+.text-gradient,
+.text-marked {
+  color: var(--brand-500);
+  padding-bottom: 0.18em;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'><path d='M3 9 C 50 2, 130 1, 197 6' fill='none' stroke='%23d9ab55' stroke-width='3.2' stroke-linecap='round'/></svg>") no-repeat 0 100% / 100% 0.32em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.dark .text-gradient,
+.dark .text-marked {
+  color: var(--brand-400);
+}
+
+/* Margin notes: Plex italic, set a little apart from the main text. */
+.font-hand {
+  font-family: var(--font-hand);
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+/*
+ * Arabic: no negative tracking (it breaks joined letters),
+ * and roomier line height for the taller script.
+ */
+[dir="rtl"] body {
+  font-family: var(--font-poppins), var(--font-plex-arabic), ui-sans-serif, system-ui, sans-serif;
+  line-height: 1.75;
+}
+[dir="rtl"] .font-display,
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3 {
+  font-family: var(--font-poppins), var(--font-plex-arabic), sans-serif;
+  letter-spacing: 0;
+}
+[dir="rtl"] .text-display-xl,
+[dir="rtl"] .text-display-lg,
+[dir="rtl"] .text-display-md {
+  letter-spacing: 0;
+  line-height: 1.3;
+}
+[dir="rtl"] [class*="tracking-"] {
+  letter-spacing: 0;
+}
+[dir="rtl"] .text-gradient,
+[dir="rtl"] .text-marked {
+  background-position: 100% 100%;
+}
+
+/* Animated gradient border; put on a relatively positioned element. */
+.gradient-border {
+  position: relative;
+  isolation: isolate;
+}
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1.5px;
+  border-radius: inherit;
+  background: linear-gradient(120deg, var(--brand-400), var(--gradient-mid), var(--accent-400), var(--brand-400));
+  background-size: 300% 300%;
+  animation: var(--animate-gradient-x);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: -1;
+}
+
+/* Subtle grain over hero areas for depth. */
+.noise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-3) 25%, color-mix(in oklab, var(--surface-3) 50%, var(--surface)) 50%, var(--surface-3) 75%);
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+}
+
+/* Slim, themed scrollbars. */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- Motion & scrolling ---------- */
+
+/*
+ * Scroll reveals, driven by CSS scroll timelines (no JavaScript): add
+ * .reveal (rise in), .reveal-fade, .reveal-scale, or .reveal-children on a
+ * list so each child reveals as it enters. Browsers without scroll timelines,
+ * and people who prefer reduced motion, simply see the content.
+ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal,
+    .reveal-children > * {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+    .reveal-fade {
+      animation: reveal-fade linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+    .reveal-scale {
+      animation: reveal-scale linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 35%;
+    }
+    /* Sticky headings that soften as their section scrolls away. */
+    .fade-out-on-exit {
+      animation: reveal-fade linear reverse both;
+      animation-timeline: view();
+      animation-range: exit 0% exit 80%;
+    }
+  }
+}
+@keyframes reveal-up {
+  from { opacity: 0; translate: 0 28px; }
+}
+@keyframes reveal-fade {
+  from { opacity: 0; }
+}
+@keyframes reveal-scale {
+  from { opacity: 0.4; scale: 0.94; }
+}
+
+/* Link underline that draws in from the reading side. */
+.link-draw {
+  background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0 1.5px;
+  transition: background-size 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+[dir="rtl"] .link-draw { background-position: 100% 100%; }
+.link-draw:hover, .link-draw:focus-visible { background-size: 100% 1.5px; }
+
+/* Cards that lift a little and sharpen their border on hover. */
+.lift {
+  transition: translate 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+@media (hover: hover) {
+  .lift:hover { translate: 0 -3px; box-shadow: var(--shadow-lift); border-color: color-mix(in oklab, var(--ink-muted) 30%, transparent); }
+}
+
+/* Room for fixed bottom bars (phone tab bar, buy bar) under floating buttons. */
+@media (max-width: 1023px) {
+  :root:has([data-bottom-bar]) { --bottom-bar: 3.75rem; }
+}
+
+/* Smooth scrolling (Lenis) takes over from the browser's own. */
+html.lenis-on { scroll-behavior: auto; }
+html.lenis-on body { overscroll-behavior: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+
+/*
+ * Parallax layers for hero art: .parallax-slow / .parallax / .parallax-fast
+ * drift at different speeds as the section scrolls by. Uses the `translate`
+ * property, so it combines with floating (transform) animations.
+ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .parallax-slow, .parallax, .parallax-fast {
+      animation: parallax-drift linear both;
+      animation-timeline: view();
+    }
+    .parallax-slow { --drift: 18px; }
+    .parallax { --drift: 36px; }
+    .parallax-fast { --drift: 64px; }
+  }
+}
+@keyframes parallax-drift {
+  from { translate: 0 var(--drift); }
+  to { translate: 0 calc(var(--drift) * -1); }
+}
+
+/*
+ * More scroll reveals: .reveal-blur (focus pulls in), .reveal-clip (a wipe
+ * from the reading side, good on images and banners) and .reveal-tilt (cards
+ * that swing up flat). Same rules as .reveal: no JS, skipped for reduced motion.
+ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal-blur {
+      animation: reveal-blur linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+    .reveal-clip {
+      animation: reveal-clip linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 40%;
+    }
+    .reveal-tilt,
+    .reveal-tilt-children > * {
+      animation: reveal-tilt linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 80%;
+      transform-origin: 50% 100%;
+    }
+    /* A header that condenses (smaller padding, stronger glass) after the first screen. */
+    .scroll-condense {
+      animation: condense linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 160px;
+    }
+    /* Images that slowly zoom out while passing through the viewport. */
+    .scroll-zoom {
+      animation: scroll-zoom linear both;
+      animation-timeline: view();
+    }
+  }
+}
+@keyframes reveal-blur {
+  from { opacity: 0; filter: blur(10px); scale: 1.02; }
+}
+@keyframes reveal-clip {
+  from { clip-path: inset(0 100% 0 0 round 1.5rem); }
+  to { clip-path: inset(0 0 0 0 round 1.5rem); }
+}
+[dir="rtl"] .reveal-clip { animation-name: reveal-clip-rtl; }
+@keyframes reveal-clip-rtl {
+  from { clip-path: inset(0 0 0 100% round 1.5rem); }
+  to { clip-path: inset(0 0 0 0 round 1.5rem); }
+}
+@keyframes reveal-tilt {
+  from { opacity: 0; translate: 0 24px; }
+}
+@keyframes condense {
+  to {
+    box-shadow: 0 1px 0 var(--line), 0 10px 30px -18px rgb(10 20 18 / 0.35);
+    background: color-mix(in oklab, var(--surface) 82%, transparent);
+    backdrop-filter: blur(18px) saturate(1.5);
+  }
+}
+@keyframes scroll-zoom {
+  from { scale: 1.12; }
+  to { scale: 1; }
+}
+
+/* A light sweep across primary buttons on hover. */
+.shine {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.shine::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.35) 48%, transparent 66%);
+  translate: -120% 0;
+  pointer-events: none;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .shine:hover::after { translate: 120% 0; transition: translate 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+}
+
+/* Tactile press for anything clickable. */
+.press { transition: scale 0.15s cubic-bezier(0.22, 1, 0.36, 1); }
+.press:active { scale: 0.97; }
+
+/* Horizontal rows that glide card-by-card on touch and trackpads. In the
+   utilities layer so responsive classes (sm:grid) can still override it. */
+@layer utilities {
+  .snap-row {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 1rem;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .snap-row::-webkit-scrollbar { display: none; }
+  .snap-row > * { scroll-snap-align: start; flex-shrink: 0; }
+}
+
+/* A timeline rail that fills in as its list scrolls past. */
+.rail { position: relative; }
+.rail::before,
+.rail::after {
+  content: "";
+  position: absolute;
+  inset-block: 0.5rem;
+  inset-inline-start: 0.6875rem;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--line);
+}
+.rail::after { background: var(--accent, var(--brand-500)); transform-origin: top; scale: 1 0; }
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .rail::after {
+      animation: rail-fill linear both;
+      animation-timeline: view();
+      animation-range: entry 40% exit 60%;
+    }
+  }
+}
+@supports not (animation-timeline: view()) {
+  .rail::after { scale: 1 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rail::after { scale: 1 1; }
+}
+@keyframes rail-fill {
+  to { scale: 1 1; }
+}
+
+/* On-load entrances for above-the-fold banners (scroll reveals can't fire there). */
+@keyframes wipe-in {
+  from { clip-path: inset(0 100% 0 0 round 1.75rem); }
+  to { clip-path: inset(0 0 0 0 round 1.75rem); }
+}
+[dir="rtl"] .animate-wipe-in { animation-name: wipe-in-rtl; }
+@keyframes wipe-in-rtl {
+  from { clip-path: inset(0 0 0 100% round 1.75rem); }
+  to { clip-path: inset(0 0 0 0 round 1.75rem); }
+}
+@keyframes rise-in {
+  from { opacity: 0; translate: 0 14px; filter: blur(4px); }
+}
+.lift.press {
+  transition: translate 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, border-color 0.25s ease, scale 0.15s cubic-bezier(0.22, 1, 0.36, 1);
+}
+

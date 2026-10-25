@@ -1,0 +1,29 @@
+{
+  "name": "educloud-web",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "node ../scripts/dev.mjs web",
+    "dev:marketing": "npm run dev -w @educloud/marketing",
+    "dev:admin": "npm run dev -w @educloud/platform-admin",
+    "dev:site": "npm run dev -w @educloud/school-site",
+    "dev:portal": "npm run dev -w @educloud/school-portal",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "dev:learner": "npm run dev -w @educloud/learner-portal"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

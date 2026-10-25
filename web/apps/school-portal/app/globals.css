@@ -1,0 +1,34 @@
+@import "tailwindcss";
+@import "@educloud/ui/theme.css";
+@source "../../../packages/ui/src";
+@source "../../../packages/portal-kit/src";
+
+/* Printing (report cards): only the page content, on white, without the app frame. */
+@media print {
+  .app-canvas > aside,
+  .app-canvas header,
+  [data-bottom-bar],
+  [data-print-hide] {
+    display: none !important;
+  }
+  .app-canvas > div {
+    padding-inline-start: 0 !important;
+  }
+  .app-canvas main {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+  html,
+  body,
+  .app-canvas {
+    background: #fff !important;
+  }
+  [data-print-card] {
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

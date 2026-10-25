@@ -1,0 +1,60 @@
+{
+  "name": "@educloud/portal-kit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Pieces shared by the staff portal and the learner & family portal: session, encrypted messaging, live lessons, recordings and realtime.",
+  "exports": {
+    "./session": "./src/session.ts",
+    "./action-result": "./src/action-result.ts",
+    "./flash-toast": "./src/flash-toast.tsx",
+    "./toast-button": "./src/toast-button.tsx",
+    "./toast-form": "./src/toast-form.tsx",
+    "./e2e": "./src/e2e.ts",
+    "./echo": "./src/echo.ts",
+    "./actions/messages": "./src/actions/messages.ts",
+    "./actions/lessons": "./src/actions/lessons.ts",
+    "./actions/reviews": "./src/actions/reviews.ts",
+    "./routes/broadcasting-auth": "./src/routes/broadcasting-auth.ts",
+    "./routes/files": "./src/routes/files.ts",
+    "./course-layout": "./src/course-layout.tsx",
+    "./course-reviews": "./src/course-reviews.tsx",
+    "./course-tile": "./src/course-tile.tsx",
+    "./lesson-actions": "./src/lesson-actions.tsx",
+    "./lesson-card": "./src/lesson-card.tsx",
+    "./live-notifications": "./src/live-notifications.tsx",
+    "./live-now-banner": "./src/live-now-banner.tsx",
+    "./messenger": "./src/messenger.tsx",
+    "./recording-admin-controls": "./src/recording-admin-controls.tsx",
+    "./recording-card": "./src/recording-card.tsx",
+    "./recording-upload-form": "./src/recording-upload-form.tsx",
+    "./review-form": "./src/review-form.tsx",
+    "./schedule-lesson-form": "./src/schedule-lesson-form.tsx",
+    "./lesson-plan": "./src/lesson-plan.ts",
+    "./lesson-plan-fields": "./src/lesson-plan-fields.tsx",
+    "./pages/calendar": "./src/pages/calendar.tsx",
+    "./pages/live": "./src/pages/live.tsx",
+    "./pages/lesson": "./src/pages/lesson.tsx",
+    "./pages/recording": "./src/pages/recording.tsx"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@educloud/api-client": "*",
+    "@educloud/ui": "*",
+    "laravel-echo": "2.6.1",
+    "libsodium-wrappers-sumo": "0.8.4",
+    "lucide-react": "1.61.0",
+    "motion": "14.6.0",
+    "pusher-js": "8.6.0"
+  },
+  "devDependencies": {
+    "@types/libsodium-wrappers-sumo": "0.8.2"
+  },
+  "peerDependencies": {
+    "next": "16.4.3",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  }
+}

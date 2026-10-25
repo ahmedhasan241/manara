@@ -1,0 +1,22 @@
+{
+  "passphrase": "correct horse battery staple",
+  "user_id": 42,
+  "text": "Hello from the web 👋 — مرحبا",
+  "backup": {
+    "public_key": "GA8WL/J2ZLGuG/7JS/tQwuiCmy8or9RpOZnHMGkAQjo=",
+    "encrypted_private_key": "IAL0ynlHti8Bw0uj9zSId4YCz1RDXPkuLwyJI7qpmeYo9BhlMpDrzEcWk5k7dxbn",
+    "private_key_nonce": "vVKwo+2LhLhOewwmZSS1lyC33zpvc+Tk",
+    "kdf_salt": "4UEVqTGJ3VXaCP5PPFTOEA==",
+    "kdf_ops_limit": 2,
+    "kdf_mem_limit": 67108864
+  },
+  "message": {
+    "id": "850d08be-85a0-4c53-9abd-ba649c65d8e7",
+    "ciphertext": "mrKHalcRHTSGOX5qYPaasvSiUHmRErfCwqD0I7jKCUo7f4HDELNIy5N/h/9WS8ttD5pvFJTRMpWhDzbcaQCdkIMG4hOXs1s=",
+    "nonce": "Ky+rUaFLWzbaY9GfLLwwJaX7+eLbj987",
+    "keys": {
+      "7": "E0iMY1bfQVlCvX/zqsQX25yO67lIRWDpeHcFl6ogqUaK4GcF32KLbZNwceYbJB1wxNMUJ38SDdLV61/yMsjeTu5uzDppAQcvhUGZzy2QYMg=",
+      "42": "1DW0roZRWjfo3xL79qkJ5IMwQ5cKR2emefY3Xoh9yDnVCyCi7vOwC4Zw4eGNvq3CHQaXL1WhsmtcnO1l380z2B8kwAFscyZVqrwAA1426RU="
+    }
+  }
+}

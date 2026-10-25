@@ -1,0 +1,20 @@
+{
+  "name": "@educloud/marketing",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3010",
+    "build": "next build",
+    "start": "next start -p 3010",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@educloud/api-client": "*",
+    "@educloud/ui": "*",
+    "next": "16.4.3",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "lucide-react": "1.61.0",
+    "motion": "14.6.0"
+  }
+}

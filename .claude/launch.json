@@ -1,0 +1,108 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "api",
+      "runtimeExecutable": "php",
+      "runtimeArgs": [
+        "api/artisan",
+        "serve",
+        "--port=8001"
+      ],
+      "port": 8001
+    },
+    {
+      "name": "reverb",
+      "runtimeExecutable": "php",
+      "runtimeArgs": [
+        "api/artisan",
+        "reverb:start",
+        "--port=8080"
+      ],
+      "port": 8080,
+      "autoPort": false
+    },
+    {
+      "name": "queue",
+      "runtimeExecutable": "php",
+      "runtimeArgs": [
+        "api/artisan",
+        "queue:listen",
+        "--tries=3",
+        "--timeout=0"
+      ]
+    },
+    {
+      "name": "scheduler",
+      "runtimeExecutable": "php",
+      "runtimeArgs": [
+        "api/artisan",
+        "schedule:work"
+      ]
+    },
+    {
+      "name": "marketing",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "web",
+        "run",
+        "dev:marketing"
+      ],
+      "port": 3010
+    },
+    {
+      "name": "platform-admin",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "web",
+        "run",
+        "dev:admin"
+      ],
+      "port": 3001
+    },
+    {
+      "name": "school-site",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "web",
+        "run",
+        "dev:site"
+      ],
+      "port": 3002
+    },
+    {
+      "name": "school-portal",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "web",
+        "run",
+        "dev:portal"
+      ],
+      "port": 3003
+    },
+    {
+      "name": "learner-portal",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "web",
+        "run",
+        "dev:learner"
+      ],
+      "port": 3004
+    },
+    {
+      "name": "everything",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "scripts/dev.mjs"
+      ],
+      "port": 3004,
+      "autoPort": false
+    }
+  ]
+}
