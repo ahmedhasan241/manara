@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AlertTriangle, CalendarCheck, ChevronDown, Clock, OctagonAlert, ShieldCheck, Users } from "lucide-react";
 import type { AttendanceReport, AttendanceStanding } from "@educloud/api-client";
-import { Avatar, Badge, Card, EmptyState, FadeIn, HeroBanner, StatCard, Stagger, StaggerItem, buttonClass, cn } from "@educloud/ui";
+import { Avatar, Badge, Card, EmptyState, FilterChips, PageHeader, StatCard, Stagger, StaggerItem, buttonClass, cn } from "@educloud/ui";
 import { getContext } from "@educloud/portal-kit/session";
 import { getI18n, getT } from "@educloud/ui/locale";
 import { ScopeFilter } from "@/components/scope-filter";
@@ -32,55 +32,40 @@ export default async function AttendancePage({ searchParams }: { searchParams: P
   const university = isUniversity(structure?.type ?? workspace.tenant.type);
   const settings = report?.settings ?? structure?.settings;
   const labels: Record<Status, string> = { all: t("Everyone"), flagged: t("Flagged"), warning: t("Warning"), limit: t("Over the limit") };
-  const href = (s: Status) => {
-    const params = new URLSearchParams(Object.entries({ scope: scope === "school" ? undefined : scope, id, status: s === "all" ? undefined : s }).filter((e): e is [string, string] => !!e[1]));
-    return `/attendance${params.size ? `?${params}` : ""}`;
-  };
 
   return (
     <>
-      <FadeIn>
-        <HeroBanner
-          eyebrow={
+      <PageHeader
+        icon={<CalendarCheck />}
+        eyebrow={report?.label ?? workspace.tenant.name}
+        title={t("Attendance")}
+        description={t("Who is missing lessons, worst first. Open a student to see each subject.")}
+        meta={
+          settings && (
             <>
-              <CalendarCheck className="h-3.5 w-3.5" /> {report?.label ?? workspace.tenant.name}
+              <Badge>
+                <Clock className="h-3.5 w-3.5" /> {t("Late after {count} min", { count: settings.late_after_minutes })}
+              </Badge>
+              <Badge tone="warning">
+                <AlertTriangle className="h-3.5 w-3.5" /> {t("Warning at {percent}% absences", { percent: settings.absence_warning_percent })}
+              </Badge>
+              <Badge tone="danger">
+                <OctagonAlert className="h-3.5 w-3.5" /> {t("Limit at {percent}% absences", { percent: settings.absence_limit_percent })}
+              </Badge>
             </>
-          }
-          title={t("Attendance")}
-          subtitle={t("Who is missing lessons, worst first. Open a student to see each subject.")}
-          meta={
-            settings && (
-              <>
-                <span className="inline-flex items-center gap-1.5">
-                  <Clock className="h-4 w-4 text-brand-600 dark:text-brand-300" /> {t("Late after {count} min", { count: settings.late_after_minutes })}
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <AlertTriangle className="h-4 w-4 text-warning" /> {t("Warning at {percent}% absences", { percent: settings.absence_warning_percent })}
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <OctagonAlert className="h-4 w-4 text-danger" /> {t("Limit at {percent}% absences", { percent: settings.absence_limit_percent })}
-                </span>
-              </>
-            )
-          }
-        />
-      </FadeIn>
-
-      <ScopeFilter scope={scope} id={id} options={scopeOptions(structure, courses.data)} university={university} keep={{ status: status === "all" ? undefined : status }} />
-
-      <nav aria-label={t("Filter by status")} className="-mx-1 mb-6 flex gap-2 overflow-x-auto px-1 pb-1">
-        {STATUSES.map((s) => (
-          <Link
-            key={s}
-            href={href(s)}
-            scroll={false}
-            aria-current={status === s ? "page" : undefined}
-            className={cn("inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition", status === s ? "fill-brand border-transparent text-white shadow-[var(--shadow-soft)]" : "border-line bg-surface text-ink-muted hover:text-ink")}
-          >
-            {labels[s]}
-          </Link>
-        ))}
-      </nav>
+          )
+        }
+        toolbar={
+          <div className="space-y-3">
+            <ScopeFilter scope={scope} id={id} options={scopeOptions(structure, courses.data)} university={university} keep={{ status: status === "all" ? undefined : status }} />
+            <FilterChips
+              param="status"
+              label={t("Status")}
+              options={STATUSES.map((s) => ({ value: s === "all" ? undefined : s, label: labels[s], tone: s === "limit" ? "danger" : s === "warning" ? "warning" : undefined }))}
+            />
+          </div>
+        }
+      />
 
       {!report ? (
         <EmptyState icon={<CalendarCheck className="h-6 w-6" />} title={t("Attendance is not available")} description={t("Pick another scope, or check back once sessions are recorded.")} />

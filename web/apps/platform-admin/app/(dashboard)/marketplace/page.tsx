@@ -1,6 +1,6 @@
-import { BookOpen, DollarSign, Pause, Play, ShoppingBag, Users } from "lucide-react";
+import { BookOpen, DollarSign, ExternalLink, Pause, Play, ShoppingBag, Store, Users } from "lucide-react";
 import { serverClient } from "@educloud/api-client/server";
-import { Badge, Card, CharacterGroup, CourseCover, FadeIn, HeroBanner, SectionHeading, Stagger, StaggerItem, Stars, StatCard, asKey } from "@educloud/ui";
+import { Badge, Card, CourseCover, PageHeader, SectionHeading, Stagger, StaggerItem, Stars, StatCard, asKey, buttonClass } from "@educloud/ui";
 import { setCourseStatus } from "../../actions";
 import { ToastButton } from "@/components/toast-button";
 import { getFormat, getT } from "@educloud/ui/locale";
@@ -20,20 +20,23 @@ export default async function MarketplacePage() {
 
   return (
     <>
-      <FadeIn>
-        <HeroBanner
-          eyebrow={t("Online courses")}
-          title={t("Course marketplace")}
-          subtitle={t("Courses published by teachers, doctors, schools and universities, and what learners buy.")}
-          meta={
-            <>
-              <span className="font-display text-2xl font-bold">{fmt.money(report.platform_revenue_cents)}</span>
-              <span className="text-ink-muted">{t("platform revenue ({percent}% of sales)", { percent: report.platform_fee_percent })}</span>
-            </>
-          }
-          art={<CharacterGroup count={3} className="w-72" />}
-        />
-      </FadeIn>
+      <PageHeader
+        eyebrow={t("Online courses")}
+        icon={<Store />}
+        title={t("Course marketplace")}
+        description={t("Courses published by teachers, doctors, schools and universities, and what learners buy.")}
+        meta={
+          <>
+            <span className="font-display text-lg font-bold">{fmt.money(report.platform_revenue_cents)}</span>
+            <span className="text-ink-muted">{t("platform revenue ({percent}% of sales)", { percent: report.platform_fee_percent })}</span>
+          </>
+        }
+        actions={
+          <a href={`${LEARNER_URL}/explore`} target="_blank" rel="noreferrer" className={buttonClass("secondary")}>
+            <ExternalLink className="h-4 w-4" /> {t("Explore courses")}
+          </a>
+        }
+      />
 
       <Stagger className="mb-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StaggerItem>

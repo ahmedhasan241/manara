@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { serverClient } from "@educloud/api-client/server";
-import { Badge, Button, Card, EmptyState, Input, PageHeader, asKey } from "@educloud/ui";
+import { Building2 } from "lucide-react";
+import { Badge, Card, ClearFilters, EmptyState, FilterBar, FilterSelect, PageHeader, Pagination, SearchField, asKey } from "@educloud/ui";
 import { setTenantStatus } from "../../actions";
 import { ToastButton } from "@/components/toast-button";
 import { getT } from "@educloud/ui/locale";
@@ -10,24 +11,39 @@ export async function generateMetadata() {
   return { title: t("Subscribers") };
 }
 
-export default async function TenantsPage({ searchParams }: { searchParams: Promise<{ search?: string; page?: string }> }) {
+export default async function TenantsPage({ searchParams }: { searchParams: Promise<{ search?: string; status?: string; page?: string }> }) {
   const t = await getT();
-  const { search, page } = await searchParams;
-  const tenants = await (await serverClient()).platformTenants({ search, page: page ? Number(page) : undefined });
+  const { search, status, page } = await searchParams;
+  const tenants = await (await serverClient()).platformTenants({ search, status, page: page ? Number(page) : undefined });
 
   return (
     <>
-      <PageHeader eyebrow={t("Customers")} title={t("Schools & teachers")} description={t("{count} workspaces: individual teachers and lecturers, schools and universities.", { count: tenants.total })} />
-
-      <form className="mb-4 flex max-w-md gap-2" role="search">
-        <Input name="search" placeholder={t("Search by name or address")} defaultValue={search} aria-label={t("Search subscribers")} />
-        <Button variant="secondary" type="submit">
-          {t("Search")}
-        </Button>
-      </form>
+      <PageHeader
+        eyebrow={t("Customers")}
+        icon={<Building2 />}
+        title={t("Schools & teachers")}
+        description={t("{count} workspaces: individual teachers and lecturers, schools and universities.", { count: tenants.total })}
+        toolbar={
+          <FilterBar
+            search={<SearchField placeholder={t("Search by name or address")} label={t("Search subscribers")} />}
+            filters={
+              <FilterSelect
+                param="status"
+                label={t("Status")}
+                allLabel={t("Any status")}
+                options={[
+                  { value: "active", label: t("Active") },
+                  { value: "suspended", label: t("Suspended") },
+                ]}
+              />
+            }
+            summary={(search || status) && <ClearFilters params={["search", "status"]} />}
+          />
+        }
+      />
 
       {tenants.data.length === 0 ? (
-        <EmptyState title={t("No subscribers found")} />
+        <EmptyState icon={<Building2 className="h-6 w-6" />} title={t("No subscribers found")} />
       ) : (
         <Card className="overflow-x-auto p-0">
           <table className="w-full text-sm">
@@ -75,6 +91,7 @@ export default async function TenantsPage({ searchParams }: { searchParams: Prom
           </table>
         </Card>
       )}
+      <Pagination page={tenants.current_page} pages={tenants.last_page} total={tenants.total} />
     </>
   );
 }

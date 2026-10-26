@@ -39,6 +39,7 @@ export default async function DesignSystemPage() {
     <>
       <PageHeader
         eyebrow={t("Product")}
+        icon={<Sparkles />}
         title={t("Design system")}
         description={t("Every token and component used across the website, portals and admin. Change the palette or mode below — the whole kit updates live.")}
       />

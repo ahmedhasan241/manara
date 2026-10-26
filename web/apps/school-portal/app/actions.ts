@@ -135,6 +135,11 @@ export async function uploadMaterial(courseId: string, form: FormData) {
   return attempt((api) => api.uploadMaterial(courseId, form), { message: t("Material added to the course."), paths: [`/courses/${courseId}`] });
 }
 
+export async function deleteMaterial(courseId: string, materialId: string) {
+  const t = await getT();
+  return attempt((api) => api.deleteMaterial(materialId), { message: t("Material removed."), paths: [`/courses/${courseId}`] });
+}
+
 export async function createAnnouncement(form: FormData) {
   const t = await getT();
   return attempt(

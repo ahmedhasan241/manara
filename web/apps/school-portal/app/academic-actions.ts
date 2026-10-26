@@ -6,6 +6,7 @@ import { serverClient } from "@educloud/api-client/server";
 import { getT } from "@educloud/ui/locale";
 import { failure } from "@educloud/portal-kit/action-result";
 import { courseStructureFields } from "@/lib/course-form";
+import type { ActionResult } from "@educloud/ui";
 import type { ActionState } from "./builder-actions";
 
 export type AcademicResult = { ok: true } | { ok: false; error: string };
@@ -89,6 +90,11 @@ export async function saveCourse(courseId: string, _state: ActionState, form: Fo
   revalidatePath("/courses");
   revalidatePath("/teaching");
   return { ok: true, message: t("Course saved.") };
+}
+
+/** saveCourse for the edit page's form (ToastForm passes only the form). */
+export async function saveCourseFromPage(courseId: string, form: FormData) {
+  return (await saveCourse(courseId, {}, form)) as ActionResult;
 }
 
 /** Edits a live lesson's plan (unit, objectives, homework, resources, summary). */

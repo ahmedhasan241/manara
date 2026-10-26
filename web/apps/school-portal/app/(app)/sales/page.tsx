@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { DollarSign, Globe2, Receipt, ShoppingBag, Users, Wallet } from "lucide-react";
-import { Badge, Card, Character, EmptyState, FadeIn, HeroBanner, SectionHeading, Stagger, StaggerItem, StatCard, asKey } from "@educloud/ui";
+import { Badge, Card, EmptyState, PageHeader, SectionHeading, Stagger, StaggerItem, StatCard, asKey, buttonClass } from "@educloud/ui";
 import { getContext } from "@educloud/portal-kit/session";
 import { getFormat, getT } from "@educloud/ui/locale";
 
@@ -19,28 +19,23 @@ export default async function SalesPage() {
 
   return (
     <>
-      <FadeIn>
-        <HeroBanner
-          eyebrow={
-            <>
-              <Globe2 className="h-3.5 w-3.5" /> {t("Online courses")}
-            </>
-          }
-          title={t("Sales & earnings")}
-          subtitle={t("What learners buy on the Manara website. You keep {percent}% of every sale.", { percent: 100 - sales.platform_fee_percent })}
-          meta={
-            <>
-              <span className="font-display text-2xl font-bold">{money(sales.earnings_cents)}</span>
-              <span className="text-ink-muted">{t("your earnings so far")}</span>
-            </>
-          }
-          art={
-            <div className="w-40">
-              <Character variant="laptop" tone={4} hair={3} hairStyle="bun" backdrop="none" />
-            </div>
-          }
-        />
-      </FadeIn>
+      <PageHeader
+        icon={<Globe2 />}
+        eyebrow={t("Online courses")}
+        title={t("Sales & earnings")}
+        description={t("What learners buy on the Manara website. You keep {percent}% of every sale.", { percent: 100 - sales.platform_fee_percent })}
+        meta={
+          <>
+            <span className="font-display text-xl font-bold">{money(sales.earnings_cents)}</span>
+            <span className="text-ink-muted">{t("your earnings so far")}</span>
+          </>
+        }
+        actions={
+          <Link href="/coupons" className={buttonClass("secondary")}>
+            {t("Discount codes")}
+          </Link>
+        }
+      />
 
       <Stagger className="mb-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StaggerItem>

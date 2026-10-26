@@ -24,7 +24,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     { id: "suspended", label: t("Suspended users"), href: "/users?status=suspended", group: "actions" },
     { id: "trials", label: t("Trials ending this week"), href: "/subscriptions?status=trial_ending", group: "actions" },
     { id: "past-due", label: t("Past-due subscriptions"), href: "/subscriptions?status=past_due", group: "actions" },
-    { id: "new-plan", label: t("Create a package"), href: "/plans", group: "actions" },
+    { id: "new-plan", label: t("Create a package"), href: "/plans/new", group: "actions" },
     { id: "edit-hero", label: t("Edit the website headline"), href: "/website", group: "actions", keywords: "marketing cms hero" },
     { id: "parents", label: t("All parents"), href: "/users?role=parent", group: "actions" },
     { id: "teachers", label: t("All teachers & doctors"), href: "/users?role=teacher", group: "actions" },
@@ -41,22 +41,19 @@ export default async function DashboardLayout({ children }: { children: React.Re
             { href: "/tenants", label: t("Schools & teachers"), icon: "tenants" },
             { href: "/users", label: t("All users"), icon: "people" },
             { href: "/subscriptions", label: t("Subscriptions"), icon: "plans" },
-            { href: "/marketplace", label: t("Course marketplace"), icon: "courses" },
           ],
         },
         {
           label: t("Product"),
           items: [
-            { href: "/plans", label: t("Packages"), icon: "courses" },
+            { href: "/plans", label: t("Packages"), icon: "package" },
+            { href: "/marketplace", label: t("Course marketplace"), icon: "store" },
             { href: "/website", label: t("Website"), icon: "website" },
             { href: "/design", label: t("Design system"), icon: "design" },
           ],
         },
-        {
-          label: t("You"),
-          items: [{ href: "/account", label: t("Your account"), icon: "settings" }],
-        },
       ]}
+      signOutAction={logout}
       workspace={{ name: t("Manara HQ"), subtitle: t("Platform admin") }}
       user={{ name: me.name, role: t("Staff"), email: me.email }}
       commands={commands}

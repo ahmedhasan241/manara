@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MessageSquareQuote, Star } from "lucide-react";
-import { Avatar, Card, CourseCover, EmptyState, FadeIn, HeroBanner, RatingSummary, SectionHeading, Stagger, StaggerItem, Stars } from "@educloud/ui";
+import { Avatar, Card, CourseCover, EmptyState, PageHeader, RatingSummary, SectionHeading, Stagger, StaggerItem, Stars } from "@educloud/ui";
 import { getContext } from "@educloud/portal-kit/session";
 import { getI18n, getT } from "@educloud/ui/locale";
 
@@ -27,26 +27,21 @@ export default async function ReviewsPage() {
 
   return (
     <>
-      <FadeIn>
-        <HeroBanner
-          eyebrow={
+      <PageHeader
+        icon={<Star />}
+        eyebrow={t("Reviews")}
+        title={t("What students think")}
+        description={t("Star ratings and comments from students enrolled in your courses.")}
+        meta={
+          average !== null && (
             <>
-              <Star className="h-3.5 w-3.5" /> {t("Reviews")}
+              <span className="font-display text-xl font-bold">{average.toFixed(1)}</span>
+              <Stars value={average} size="md" />
+              <span className="text-ink-muted">{t("{reviews} reviews across {courses} courses", { reviews: total, courses: courses.length })}</span>
             </>
-          }
-          title={t("What students think")}
-          subtitle={t("Star ratings and comments from students enrolled in your courses.")}
-          meta={
-            average !== null && (
-              <>
-                <span className="font-display text-2xl font-bold">{average.toFixed(1)}</span>
-                <Stars value={average} size="md" />
-                <span className="text-white/80">{t("{reviews} reviews across {courses} courses", { reviews: total, courses: courses.length })}</span>
-              </>
-            )
-          }
-        />
-      </FadeIn>
+          )
+        }
+      />
 
       {total === 0 ? (
         <EmptyState icon={<MessageSquareQuote className="h-6 w-6" />} title={t("No reviews yet")} description={t("Students can rate a course from its Reviews tab.")} />

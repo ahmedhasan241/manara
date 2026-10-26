@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ShieldCheck, Users } from "lucide-react";
 import { serverClient } from "@educloud/api-client/server";
-import { Avatar, Badge, Button, Card, EmptyState, Input, PageHeader, Select, asKey, cn, formatLocation } from "@educloud/ui";
+import { Avatar, Badge, Card, ClearFilters, EmptyState, FilterBar, FilterChips, FilterSelect, PageHeader, Pagination, SearchField, asKey, formatLocation } from "@educloud/ui";
 import { getFormat, getRequestLocale, getT } from "@educloud/ui/locale";
 
 export async function generateMetadata() {
@@ -28,42 +28,40 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
   const params = await searchParams;
   const users = await (await serverClient()).platformUsers({ search: params.search, role: params.role, status: params.status, page: params.page ? Number(params.page) : undefined });
 
-  const href = (overrides: Record<string, string | undefined>) => {
-    const q = new URLSearchParams(Object.entries({ ...params, page: undefined, ...overrides }).filter((e): e is [string, string] => !!e[1]));
-    return `/users${q.size ? `?${q}` : ""}`;
-  };
 
   return (
     <>
-      <PageHeader eyebrow={t("Customers")} title={t("All users")} description={t("{count} people across every school, university and teacher workspace.", { count: users.total })} />
-
-      <div className="mb-4 flex flex-wrap gap-2">
-        {ROLES.map((r) => (
-          <Link
-            key={r.value}
-            href={href({ role: r.value || undefined })}
-            className={cn(
-              "rounded-full px-4 py-1.5 text-sm font-semibold transition",
-              (params.role ?? "") === r.value ? "bg-brand-600 text-white" : "bg-surface text-ink-muted ring-1 ring-line hover:text-ink",
-            )}
-          >
-            {t(r.label)}
-          </Link>
-        ))}
-      </div>
-
-      <form className="mb-6 flex max-w-2xl flex-wrap gap-2" role="search">
-        {params.role && <input type="hidden" name="role" value={params.role} />}
-        <Input name="search" defaultValue={params.search} placeholder={t("Search name or email")} aria-label={t("Search users")} className="min-w-60 flex-1" />
-        <Select name="status" defaultValue={params.status ?? ""} aria-label={t("Status")} className="w-40">
-          <option value="">{t("Any status")}</option>
-          <option value="active">{t("Active")}</option>
-          <option value="suspended">{t("Suspended")}</option>
-        </Select>
-        <Button variant="secondary" type="submit">
-          {t("Filter")}
-        </Button>
-      </form>
+      <PageHeader
+        eyebrow={t("Customers")}
+        icon={<Users />}
+        title={t("All users")}
+        description={t("{count} people across every school, university and teacher workspace.", { count: users.total })}
+        toolbar={
+          <FilterBar
+            search={<SearchField placeholder={t("Search name or email")} label={t("Search users")} />}
+            filters={
+              <FilterSelect
+                param="status"
+                label={t("Status")}
+                allLabel={t("Any status")}
+                options={[
+                  { value: "active", label: t("Active") },
+                  { value: "suspended", label: t("Suspended") },
+                ]}
+              />
+            }
+            chips={<FilterChips param="role" label={t("Role")} options={ROLES.map((r) => ({ value: r.value || undefined, label: t(r.label) }))} />}
+            summary={
+              (params.search || params.role || params.status) && (
+                <>
+                  <span>{t("{count} people", { count: users.total })}</span>
+                  <ClearFilters params={["search", "role", "status"]} />
+                </>
+              )
+            }
+          />
+        }
+      />
 
       {users.data.length === 0 ? (
         <EmptyState icon={<Users className="h-6 w-6" />} title={t("No users match")} />
@@ -115,23 +113,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
         </Card>
       )}
 
-      {users.last_page > 1 && (
-        <nav className="mt-6 flex items-center justify-center gap-2 text-sm" aria-label={t("Pages")}>
-          {users.current_page > 1 && (
-            <Link href={href({ page: String(users.current_page - 1) })} className="rounded-lg px-3 py-1.5 ring-1 ring-line hover:bg-surface">
-              {t("Previous")}
-            </Link>
-          )}
-          <span className="text-ink-muted">
-            {t("Page {page} of {pages}", { page: users.current_page, pages: users.last_page })}
-          </span>
-          {users.current_page < users.last_page && (
-            <Link href={href({ page: String(users.current_page + 1) })} className="rounded-lg px-3 py-1.5 ring-1 ring-line hover:bg-surface">
-              {t("Next")}
-            </Link>
-          )}
-        </nav>
-      )}
+      <Pagination page={users.current_page} pages={users.last_page} total={users.total} />
     </>
   );
 }

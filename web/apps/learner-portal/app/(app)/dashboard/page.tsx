@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AlertTriangle, BookOpen, CalendarCheck, CalendarClock, CalendarDays, GraduationCap, Sparkles, Video } from "lucide-react";
-import { Badge, BannerArt, Card, Carousel, CategoryTile, ContinueCard, Countdown, CourseCover, EmptyState, FadeIn, HeroBanner, ProgressBar, SectionHeading, Sparkline, Stagger, StaggerItem, Stars, StatCard, asKey, bannerButtonClass, firstName } from "@educloud/ui";
+import { Badge, BannerArt, Card, CategoryTile, Countdown, CourseCover, EmptyState, FadeIn, HeroBanner, ProgressBar, SectionHeading, Sparkline, Stagger, StaggerItem, Stars, StatCard, asKey, bannerButtonClass, firstName } from "@educloud/ui";
 import { requireAudience } from "@educloud/portal-kit/session";
 import { ProgressRing } from "@/components/progress-ring";
 import { Celebration } from "@/components/celebration";
@@ -109,67 +109,51 @@ export default async function OverviewPage() {
         </FadeIn>
       )}
 
+
+      <Stagger className="mb-8 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+        <StaggerItem>
+          <StatCard
+            label={t("Overall average")}
+            value={totals.grade_average == null ? "—" : `${totals.grade_average}%`}
+            icon={<GraduationCap className="h-5 w-5" />}
+            meter={totals.grade_average}
+            tone={totals.grade_average == null ? undefined : totals.grade_average >= 80 ? "success" : totals.grade_average >= 60 ? undefined : "danger"}
+            href="/report-card"
+          />
+        </StaggerItem>
+        <StaggerItem>
+          <StatCard
+            label={t("Attendance")}
+            value={totals.attendance_rate == null ? "—" : `${totals.attendance_rate}%`}
+            icon={<CalendarCheck className="h-5 w-5" />}
+            accent="accent"
+            meter={totals.attendance_rate}
+            tone={totals.attendance_rate == null ? undefined : totals.attendance_rate >= 90 ? "success" : totals.attendance_rate >= 75 ? "warning" : "danger"}
+            href="/attendance"
+          />
+        </StaggerItem>
+        <StaggerItem>
+          <StatCard label={t("Courses")} value={totals.courses} icon={<BookOpen className="h-5 w-5" />} accent="amber" href="/courses" />
+        </StaggerItem>
+        <StaggerItem>
+          <StatCard label={t("Upcoming live lessons")} value={totals.upcoming_lessons} icon={<Video className="h-5 w-5" />} accent="live" href="/calendar" />
+        </StaggerItem>
+      </Stagger>
+
       {card && (
         <FadeIn delay={0.08}>
           <StandingWidget card={card} child={isParent ? studentName : null} />
         </FadeIn>
       )}
 
-      {overview.courses.length > 0 && (
-        <section aria-labelledby="continue-heading" className="mb-10">
-          <Carousel label={t("Continue learning")} heading={<SectionHeading title={<span id="continue-heading">{t("Continue learning")}</span>} href="/courses" linkLabel={t("See all")} />}>
-            {continueCourses.map((c) => (
-              <ContinueCard
-                key={c.id}
-                href={`/courses/${c.id}`}
-                title={c.title}
-                category={c.category}
-                teacher={c.teacher}
-                done={c.lessons_done_count}
-                total={c.lessons_count}
-                progressLabel={lessonOf(c.lessons_done_count, c.lessons_count)}
-              />
-            ))}
-          </Carousel>
-        </section>
-      )}
-
-      <Stagger className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StaggerItem>
-          <StatCard label={t("Overall average")} value={totals.grade_average == null ? "—" : `${totals.grade_average}%`} icon={<GraduationCap className="h-5 w-5" />} />
-        </StaggerItem>
-        <StaggerItem>
-          <StatCard label={t("Attendance")} value={totals.attendance_rate == null ? "—" : `${totals.attendance_rate}%`} icon={<CalendarCheck className="h-5 w-5" />} accent="accent" />
-        </StaggerItem>
-        <StaggerItem>
-          <StatCard label={t("Courses")} value={totals.courses} icon={<BookOpen className="h-5 w-5" />} accent="amber" />
-        </StaggerItem>
-        <StaggerItem>
-          <StatCard label={t("Upcoming live lessons")} value={totals.upcoming_lessons} icon={<Video className="h-5 w-5" />} accent="live" />
-        </StaggerItem>
-      </Stagger>
-
-      {categories.length > 1 && (
-        <section aria-labelledby="categories-heading" className="mb-10">
-          <SectionHeading title={<span id="categories-heading">{t("Browse by category")}</span>} />
-          <Stagger className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {categories.map(([name, count]) => (
-              <StaggerItem key={name}>
-                <CategoryTile href={`/courses?category=${encodeURIComponent(name)}`} title={t(asKey(name))} iconKey={name} count={t("{count} courses", { count })} />
-              </StaggerItem>
-            ))}
-          </Stagger>
-        </section>
-      )}
-
-      <div className="grid grid-cols-1 gap-8 xl:grid-cols-[1fr_22rem]">
-        <section aria-labelledby="courses-heading">
-          <SectionHeading title={<span id="courses-heading">{t("Course progress")}</span>} />
+      <div className="mb-10 grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <section aria-labelledby="courses-heading" className="min-w-0">
+          <SectionHeading title={<span id="courses-heading">{t("Continue learning")}</span>} href="/courses" linkLabel={t("See all")} />
           {overview.courses.length === 0 ? (
             <EmptyState icon={<BookOpen className="h-6 w-6" />} title={t("Not enrolled in any courses yet")} />
           ) : (
             <Stagger className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              {overview.courses.map((c) => (
+              {continueCourses.map((c) => (
                 <StaggerItem key={c.id}>
                   <Link
                     href={`/courses/${c.id}`}
@@ -244,7 +228,7 @@ export default async function OverviewPage() {
                   {overview.recent_grades.map((g) => (
                     <li key={g.id} className="flex items-center gap-3 rounded-xl p-3 transition hover:bg-surface-2">
                       <span
-                        className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl font-display text-sm font-bold ${g.percent >= 80 ? "bg-mint text-brand-700 dark:text-brand-300" : g.percent >= 60 ? "bg-peach text-brand-700 dark:text-brand-300" : "bg-blush text-brand-700 dark:text-brand-300"}`}
+                        className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl font-display text-sm font-bold ${g.percent >= 80 ? "bg-success/12 text-success" : g.percent >= 60 ? "bg-brand-500/12 text-brand-700 dark:text-brand-300" : "bg-danger/10 text-danger"}`}
                       >
                         {Math.round(g.percent)}
                       </span>
@@ -287,6 +271,19 @@ export default async function OverviewPage() {
           </section>
         </aside>
       </div>
+
+      {categories.length > 1 && (
+        <section aria-labelledby="categories-heading">
+          <SectionHeading title={<span id="categories-heading">{t("Browse by category")}</span>} />
+          <Stagger className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {categories.map(([name, count]) => (
+              <StaggerItem key={name}>
+                <CategoryTile href={`/courses?category=${encodeURIComponent(name)}`} title={t(asKey(name))} iconKey={name} count={t("{count} courses", { count })} />
+              </StaggerItem>
+            ))}
+          </Stagger>
+        </section>
+      )}
     </>
   );
 }

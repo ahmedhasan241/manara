@@ -5,6 +5,7 @@ import { LiveNotifications } from "@educloud/portal-kit/live-notifications";
 import { LiveNowBanner } from "@educloud/portal-kit/live-now-banner";
 import { ChildSwitcher } from "@/components/child-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
+import { logout } from "@/app/actions";
 import { getI18n, getT } from "@educloud/ui/locale";
 
 export default async function LearnerLayout({ children }: { children: React.ReactNode }) {
@@ -27,10 +28,15 @@ export default async function LearnerLayout({ children }: { children: React.Reac
         { href: "/dashboard", label: isParent ? t("Overview") : t("My progress"), icon: "dashboard" },
         { href: "/courses", label: t("Courses"), icon: "courses" },
         { href: "/live", label: t("Live lessons"), icon: "live", badge: liveNow.length ? "live" : undefined },
+        { href: "/calendar", label: t("Calendar"), icon: "calendar" },
+      ],
+    },
+    {
+      label: t("Results"),
+      items: [
         { href: "/report-card", label: isParent ? t("Report card") : t("My grades"), icon: "report" },
         { href: "/attendance", label: t("Attendance"), icon: "attendance" },
         { href: "/rankings", label: t("Honor roll"), icon: "rankings" },
-        { href: "/calendar", label: t("Calendar"), icon: "calendar" },
       ],
     },
     {
@@ -44,11 +50,10 @@ export default async function LearnerLayout({ children }: { children: React.Reac
     {
       label: t("Learn online"),
       items: [
-        { href: "/my-learning", label: t("My learning"), icon: "courses" },
-        { href: "/explore", label: t("Explore courses"), icon: "website" },
+        { href: "/my-learning", label: t("My learning"), icon: "library" },
+        { href: "/explore", label: t("Explore courses"), icon: "explore" },
       ],
     },
-    { label: t("Account"), items: [{ href: "/settings", label: t("Settings"), icon: "settings" }] },
   ];
 
   const commands: CommandItem[] = [
@@ -86,6 +91,7 @@ export default async function LearnerLayout({ children }: { children: React.Reac
       }}
       commands={commands}
       signOut={signOut}
+      signOutAction={logout}
       bottomNav={["/dashboard", "/courses", "/live", "/messages"]}
       banner={
         <>

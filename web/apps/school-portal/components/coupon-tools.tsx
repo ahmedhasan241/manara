@@ -1,37 +1,44 @@
 "use client";
 
-import { useActionState, useTransition } from "react";
+import { useTransition } from "react";
 import { Copy, Pause, Play, Trash2 } from "lucide-react";
-import { Button, ConfirmDialog, Field, Input, SelectMenu, Tooltip, toast, useActionToast, useStateToast, useT } from "@educloud/ui";
-import { createCoupon, deleteCoupon, setCouponActive, type ActionState } from "@/app/builder-actions";
+import { Button, ConfirmDialog, Field, FormActions, FormSection, Input, SelectMenu, Tooltip, toast, useActionToast, useT } from "@educloud/ui";
+import { ToastForm } from "@educloud/portal-kit/toast-form";
+import { deleteCoupon, setCouponActive } from "@/app/builder-actions";
+import { createCouponFromPage } from "@/app/(app)/coupons/actions";
 
+/** The new-code form on its own page (/coupons/new); back to the list once it's created. */
 export function CouponForm({ courses }: { courses: { id: string; title: string }[] }) {
   const t = useT();
-  const [state, action, pending] = useActionState<ActionState, FormData>(async (prev, form) => ({ ...(await createCoupon(prev, form)), at: Date.now() }), {});
-  useStateToast(state);
   return (
-    <form action={action} className="space-y-3.5" key={state.ok ? state.at : undefined}>
-      <Field label={t("Code")} htmlFor="coupon-code" hint={t("Letters, numbers, dashes. Learners type it in the cart.")}>
-        <Input id="coupon-code" name="code" required minLength={3} maxLength={32} pattern="[A-Za-z0-9_-]+" placeholder="LAUNCH25" className="font-mono uppercase" dir="ltr" />
-      </Field>
-      <Field label={t("Discount (%)")} htmlFor="coupon-percent">
-        <Input id="coupon-percent" name="percent_off" type="number" min={1} max={100} required defaultValue={20} />
-      </Field>
-      <Field label={t("Course")} htmlFor="coupon-course">
-        <SelectMenu id="coupon-course" name="course_id" defaultValue="all" options={[{ value: "all", label: t("All online courses") }, ...courses.map((c) => ({ value: c.id, label: c.title }))]} />
-      </Field>
-      <div className="grid grid-cols-2 gap-3">
-        <Field label={t("Max uses")} htmlFor="coupon-max" hint={t("Empty = unlimited")}>
-          <Input id="coupon-max" name="max_uses" type="number" min={1} />
-        </Field>
-        <Field label={t("Ends on")} htmlFor="coupon-ends">
-          <Input id="coupon-ends" name="expires_at" type="date" />
-        </Field>
+    <ToastForm action={createCouponFromPage} loading={t("Saving…")} redirectTo="/coupons">
+      <div className="rounded-[var(--radius-card)] border border-line bg-surface p-4 shadow-[var(--shadow-soft)] sm:p-6">
+        <FormSection title={t("Code")} description={t("Letters, numbers, dashes. Learners type it in the cart.")}>
+          <Field label={t("Code")} htmlFor="coupon-code">
+            <Input id="coupon-code" name="code" required autoFocus minLength={3} maxLength={32} pattern="[A-Za-z0-9_-]+" placeholder="LAUNCH25" className="font-mono uppercase" dir="ltr" />
+          </Field>
+          <Field label={t("Discount (%)")} htmlFor="coupon-percent">
+            <Input id="coupon-percent" name="percent_off" type="number" min={1} max={100} required defaultValue={20} />
+          </Field>
+          <div className="sm:col-span-2">
+            <Field label={t("Course")} htmlFor="coupon-course">
+              <SelectMenu id="coupon-course" name="course_id" defaultValue="all" options={[{ value: "all", label: t("All online courses") }, ...courses.map((c) => ({ value: c.id, label: c.title }))]} />
+            </Field>
+          </div>
+        </FormSection>
+        <FormSection title={t("Max uses")}>
+          <Field label={t("Max uses")} htmlFor="coupon-max" hint={t("Empty = unlimited")}>
+            <Input id="coupon-max" name="max_uses" type="number" min={1} />
+          </Field>
+          <Field label={t("Ends on")} htmlFor="coupon-ends">
+            <Input id="coupon-ends" name="expires_at" type="date" />
+          </Field>
+        </FormSection>
       </div>
-      <Button type="submit" disabled={pending} className="w-full">
-        {pending ? t("Saving…") : t("Create code")}
-      </Button>
-    </form>
+      <FormActions cancel={{ href: "/coupons", label: t("Cancel") }}>
+        <Button type="submit">{t("Create code")}</Button>
+      </FormActions>
+    </ToastForm>
   );
 }
 

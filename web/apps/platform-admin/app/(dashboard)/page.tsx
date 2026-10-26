@@ -1,7 +1,7 @@
 import { serverClient } from "@educloud/api-client/server";
 import Link from "next/link";
 import { Building2, CreditCard, DollarSign, Globe2, ServerCrash, Users } from "lucide-react";
-import { BannerArt, BarChart, Card, FadeIn, HeroBanner, SectionHeading, Sparkline, Stagger, StaggerItem, StatCard, bannerButtonClass } from "@educloud/ui";
+import { BannerArt, BarChart, Card, FadeIn, HeroBanner, LineChart, SectionHeading, Stagger, StaggerItem, StatCard, asKey, bannerButtonClass } from "@educloud/ui";
 import { getFormat, getT } from "@educloud/ui/locale";
 
 export async function generateMetadata() {
@@ -51,15 +51,31 @@ export default async function OverviewPage() {
         />
       </FadeIn>
 
-      <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <Stagger className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StaggerItem>
-          <StatCard label={t("Monthly recurring revenue")} value={fmt.money(stats.mrr_cents)} icon={<DollarSign className="h-5 w-5" />} />
+          <StatCard label={t("Monthly recurring revenue")} value={fmt.money(stats.mrr_cents)} icon={<DollarSign className="h-5 w-5" />} href="/subscriptions" />
         </StaggerItem>
         <StaggerItem>
-          <StatCard label={t("Active subscribers")} value={stats.tenants.active} hint={t("{count} total", { count: stats.tenants.total })} icon={<Building2 className="h-5 w-5" />} accent="accent" />
+          <StatCard
+            label={t("Active subscribers")}
+            value={stats.tenants.active}
+            hint={t("{count} total", { count: stats.tenants.total })}
+            meter={stats.tenants.total ? (stats.tenants.active / stats.tenants.total) * 100 : null}
+            icon={<Building2 className="h-5 w-5" />}
+            accent="accent"
+            href="/tenants"
+          />
         </StaggerItem>
         <StaggerItem>
-          <StatCard label={t("Members")} value={stats.users.members} hint={t("{count} signed in this week", { count: stats.users.active_last_7_days })} icon={<Users className="h-5 w-5" />} accent="amber" />
+          <StatCard
+            label={t("Members")}
+            value={stats.users.members}
+            hint={t("{count} signed in this week", { count: stats.users.active_last_7_days })}
+            meter={stats.users.members ? (stats.users.active_last_7_days / stats.users.members) * 100 : null}
+            icon={<Users className="h-5 w-5" />}
+            accent="amber"
+            href="/users"
+          />
         </StaggerItem>
         <StaggerItem>
           <StatCard
@@ -73,16 +89,27 @@ export default async function OverviewPage() {
         </StaggerItem>
       </Stagger>
 
-      <SectionHeading title={t("Growth & usage")} className="mt-10" />
+      <SectionHeading title={t("Growth & usage")} className="mt-8" />
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <h2 className="font-semibold">{t("Sign-ups, last 30 days")}</h2>
-          <p className="mb-4 text-sm text-ink-muted">{t("{count} new workspaces", { count: signups.reduce((a, b) => a + b, 0) })}</p>
-          <Sparkline values={signups} label={t("New workspaces per day over the last 30 days")} />
+        <Card className="lg:col-span-2">
+          <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="font-semibold">{t("Sign-ups, last 30 days")}</h2>
+            <p className="text-sm text-ink-muted">{t("{count} new workspaces", { count: signups.reduce((a, b) => a + b, 0) })}</p>
+          </div>
+          <LineChart
+            label={t("New workspaces per day over the last 30 days")}
+            data={days.map((d, i) => ({ label: fmt.date(d, { month: "short", day: "numeric" }), value: signups[i]! }))}
+            max={Math.max(4, ...signups)}
+            format={(v) => String(Math.round(v))}
+            height={140}
+          />
         </Card>
         <Card>
           <h2 className="mb-4 font-semibold">{t("Subscriptions by status")}</h2>
-          <BarChart label={t("Subscriptions by status")} data={Object.entries(stats.subscriptions).map(([label, value]) => ({ label, value }))} />
+          <BarChart
+            label={t("Subscriptions by status")}
+            data={Object.entries(stats.subscriptions).map(([label, value]) => ({ label: t(asKey(label)), value }))}
+          />
         </Card>
         <Card>
           <h2 className="mb-1 font-semibold">{t("Everyone on the platform")}</h2>
@@ -94,7 +121,7 @@ export default async function OverviewPage() {
         </Card>
         <Card>
           <h2 className="mb-4 font-semibold">{t("Subscribers by type")}</h2>
-          <BarChart label={t("Subscribers by type")} data={Object.entries(stats.tenants.by_type).map(([label, value]) => ({ label, value }))} />
+          <BarChart label={t("Subscribers by type")} data={Object.entries(stats.tenants.by_type).map(([label, value]) => ({ label: t(asKey(label)), value }))} />
         </Card>
       </div>
     </>

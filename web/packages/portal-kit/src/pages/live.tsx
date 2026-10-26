@@ -2,7 +2,7 @@ import { Radio, Video } from "lucide-react";
 import { EmptyState, PageHeader, Stagger, StaggerItem } from "@educloud/ui";
 import { getContext } from "../session";
 import { LessonCard } from "../lesson-card";
-import { ScheduleLessonForm } from "../schedule-lesson-form";
+import { ScheduleLessonLink } from "../schedule-lesson-form";
 import { getFormat, getT } from "@educloud/ui/locale";
 
 export async function generateMetadata() {
@@ -15,7 +15,7 @@ export default async function LivePage() {
   const t = await getT();
   const { api, can } = await getContext();
   const canHost = can("courses.manage");
-  const [lessons, courses] = await Promise.all([api.upcomingLessons(), canHost ? api.courses({}) : null]);
+  const lessons = await api.upcomingLessons();
 
   const live = lessons.filter((l) => l.status === "live");
   const upcoming = lessons.filter((l) => l.status === "scheduled");
@@ -24,12 +24,12 @@ export default async function LivePage() {
   return (
     <>
       <PageHeader
+        icon={<Video />}
         eyebrow={t("Online classroom")}
         title={t("Live lessons")}
         description={t("Join lectures from anywhere. Recordings appear on the course page when a lesson ends.")}
+        actions={canHost && <ScheduleLessonLink />}
       />
-
-      {courses && <ScheduleLessonForm courses={courses.data} />}
 
       {live.length > 0 && (
         <section aria-labelledby="live-heading" className="mb-10">

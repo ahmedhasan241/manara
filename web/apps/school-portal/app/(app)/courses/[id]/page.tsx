@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CalendarCheck, Download, Film, Globe2, FolderOpen, GraduationCap, ListChecks, Star, Timer, Video } from "lucide-react";
+import { CalendarCheck, Download, Film, Globe2, FolderOpen, GraduationCap, ListChecks, Pencil, Plus, Star, Timer, Video } from "lucide-react";
 import { ApiError } from "@educloud/api-client";
-import { Badge, Button, Card, EmptyState, Field, Input, Select, Stagger, StaggerItem, Tabs, asKey, bannerButtonClass, buttonClass } from "@educloud/ui";
+import { Badge, Button, Card, EmptyState, Field, Input, Stagger, StaggerItem, Tabs, asKey, bannerButtonClass, buttonClass } from "@educloud/ui";
 import { getContext } from "@educloud/portal-kit/session";
 import { ToastForm } from "@educloud/portal-kit/toast-form";
 import { Gradebook } from "@/components/gradebook";
@@ -13,11 +13,11 @@ import { CourseReviews } from "@educloud/portal-kit/course-reviews";
 import { RecordingUploadForm } from "@educloud/portal-kit/recording-upload-form";
 import { RollCall } from "@/components/roll-call";
 import { CourseBuilder } from "@/components/course-builder";
-import { ScheduleLessonForm } from "@educloud/portal-kit/schedule-lesson-form";
-import { createAssessment, createSession, uploadMaterial } from "../../../actions";
-import { getFormat, getI18n, getT } from "@educloud/ui/locale";
-import { CourseEditDialog } from "@/components/course-edit-dialog";
-import { levelOptions } from "@/lib/scope";
+import { ScheduleLessonLink } from "@educloud/portal-kit/schedule-lesson-form";
+import { createSession } from "../../../actions";
+import { getI18n, getT } from "@educloud/ui/locale";
+import { CourseSetupGuide } from "@/components/course-setup-guide";
+import { MaterialList, MaterialUploadForm } from "@/components/materials";
 
 export async function generateMetadata() {
   const t = await getT();
@@ -32,16 +32,15 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
   const query = await searchParams;
   const requested = query.tab as Tab;
   const tab: Tab = TABS.includes(requested) ? requested : "live";
-  const { api, can, isStaff, workspace } = await getContext();
+  const { api, can, isStaff } = await getContext();
   const { t } = await getI18n();
 
-  const [course, lessons, structure] = await Promise.all([
+  const [course, lessons] = await Promise.all([
     api.course(id).catch((error) => {
       if (error instanceof ApiError && error.status === 404) notFound();
       throw error;
     }),
     api.courseLessons(id).catch(() => []),
-    can("courses.manage") ? api.academicStructure().catch(() => null) : Promise.resolve(null),
   ]);
 
   return (
@@ -51,7 +50,11 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
       actions={
         (can("reports.view") || can("courses.manage")) && (
           <>
-            {can("courses.manage") && <CourseEditDialog course={course} levels={levelOptions(structure)} university={(structure?.type ?? workspace.tenant.type) === "university"} />}
+            {can("courses.manage") && (
+              <Link href={`/courses/${id}/edit`} className={bannerButtonClass("outline")}>
+                <Pencil className="h-4 w-4" /> {t("Edit course")}
+              </Link>
+            )}
             {can("reports.view") && (
               <>
             <a className={bannerButtonClass()} href={`/api/files/exports/courses/${id}/grades.csv`}>
@@ -66,6 +69,8 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
         )
       }
     >
+      {can("courses.manage") && <CourseSetupGuide courseId={id} lessons={lessons} />}
+
       <Tabs
         id="course"
         active={tab}
@@ -91,7 +96,7 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
   );
 }
 
-async function LiveTab({ courseId, canHost, course }: { courseId: string; canHost: boolean; course: { id: string; title: string; code: string } }) {
+async function LiveTab({ courseId, canHost }: { courseId: string; canHost: boolean; course: { id: string; title: string; code: string } }) {
   const t = await getT();
   const { api } = await getContext();
   const lessons = await api.courseLessons(courseId);
@@ -100,7 +105,7 @@ async function LiveTab({ courseId, canHost, course }: { courseId: string; canHos
 
   return (
     <div className="space-y-8">
-      {canHost && <ScheduleLessonForm courses={[course]} defaultCourseId={courseId} />}
+      {canHost && <ScheduleLessonLink courseId={courseId} />}
       {current.length === 0 && past.length === 0 ? (
         <EmptyState icon={<Video className="h-6 w-6" />} title={t("No live lessons yet")} description={canHost ? t("Schedule one above — students are notified instantly.") : t("Your teacher hasn't scheduled any live lessons yet.")} />
       ) : (
@@ -167,37 +172,9 @@ async function GradesTab({ courseId, canWrite, isStaff }: { courseId: string; ca
   return (
     <div className="space-y-6">
       {canWrite && (
-        <details>
-          <summary className="cursor-pointer text-sm font-medium text-brand-600">{t("+ New assessment")}</summary>
-          <Card className="mt-3">
-            <ToastForm action={createAssessment.bind(null, courseId)} resetOnSuccess className="grid gap-4 sm:grid-cols-5 sm:items-end">
-              <div className="sm:col-span-2">
-                <Field label={t("Title")} htmlFor="title">
-                  <Input id="title" name="title" required />
-                </Field>
-              </div>
-              <Field label={t("Type")} htmlFor="type">
-                <Select id="type" name="type" defaultValue="assignment">
-                  {["assignment", "quiz", "exam", "project", "participation"].map((v) => (
-                    <option key={v} value={v}>
-                      {t(asKey(v))}
-                    </option>
-                  ))}
-                </Select>
-              </Field>
-              <Field label={t("Max score")} htmlFor="max_score">
-                <Input id="max_score" name="max_score" type="number" min={1} defaultValue={100} />
-              </Field>
-              <Field label={t("Due")} htmlFor="due_at">
-                <Input id="due_at" name="due_at" type="datetime-local" />
-              </Field>
-              <label className="flex items-center gap-2 text-sm sm:col-span-4">
-                <input type="checkbox" name="publish" defaultChecked /> {t("Visible to students now")}
-              </label>
-              <Button type="submit">{t("Add")}</Button>
-            </ToastForm>
-          </Card>
-        </details>
+        <Link href={`/courses/${courseId}/assessments/new`} className={buttonClass(assessments.length === 0 ? "primary" : "soft")}>
+          <Plus className="h-4 w-4" /> {t("Add an assessment")}
+        </Link>
       )}
 
       {isStaff && assessments.length > 0 && (
@@ -342,57 +319,17 @@ async function AttendanceTab({ courseId, canWrite, sessionId }: { courseId: stri
 }
 
 async function MaterialsTab({ courseId, canWrite }: { courseId: string; canWrite: boolean }) {
-  const fmt = await getFormat();
   const t = await getT();
   const { api } = await getContext();
   const materials = await api.materials(courseId);
 
   return (
     <div className="space-y-6">
-      {canWrite && (
-        <Card>
-          <h2 className="mb-3 font-semibold">{t("Share material")}</h2>
-          <ToastForm action={uploadMaterial.bind(null, courseId)} loading={t("Uploading…")} resetOnSuccess className="grid gap-4 sm:grid-cols-2">
-            <Field label={t("Title")} htmlFor="m-title">
-              <Input id="m-title" name="title" required />
-            </Field>
-            <Field label={t("File (up to 50 MB)")} htmlFor="file">
-              <Input id="file" name="file" type="file" className="py-1.5" />
-            </Field>
-            <Field label={t("…or a link")} htmlFor="url">
-              <Input id="url" name="url" type="url" placeholder="https://" />
-            </Field>
-            <div className="sm:self-end">
-              <Button type="submit">{t("Share")}</Button>
-            </div>
-          </ToastForm>
-        </Card>
-      )}
-
+      {canWrite && <MaterialUploadForm courseId={courseId} />}
       {materials.length === 0 ? (
-        <EmptyState title={t("No materials yet")} />
+        <EmptyState icon={<FolderOpen className="h-6 w-6" />} title={t("No materials yet")} />
       ) : (
-        <ul className="divide-y divide-line rounded-xl border border-line bg-surface">
-          {materials.map((m) => (
-            <li key={m.id} className="flex items-center justify-between gap-4 p-4">
-              <div className="min-w-0">
-                <p className="truncate font-medium">{m.title}</p>
-                <p className="text-xs text-ink-muted">
-                  {fmt.date(m.created_at)}
-                  {m.size_bytes > 0 && ` · ${(m.size_bytes / 1024 / 1024).toFixed(1)} MB`}
-                </p>
-              </div>
-              <a
-                href={m.url ?? `/api/files/materials/${m.id}/download`}
-                target={m.url ? "_blank" : undefined}
-                rel="noreferrer"
-                className={buttonClass("secondary", "sm")}
-              >
-                {m.url ? t("Open") : t("Download")}
-              </a>
-            </li>
-          ))}
-        </ul>
+        <MaterialList courseId={courseId} materials={materials} canWrite={canWrite} />
       )}
     </div>
   );

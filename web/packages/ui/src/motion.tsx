@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { animate, motion, MotionConfig, useInView, useReducedMotion, type Variants } from "motion/react";
 import { useFormat, useT } from "./i18n-provider";
 
@@ -13,12 +13,28 @@ export function MotionProvider({ children }: { children: ReactNode }) {
   return <MotionConfig reducedMotion="user">{children}</MotionConfig>;
 }
 
+/**
+ * Inside app screens (dashboards, lists) content should be there at once, not
+ * wait to be scrolled to: FadeIn and Stagger then play on mount instead.
+ */
+const OnMount = createContext(false);
+
+export function RevealOnMount({ children }: { children: ReactNode }) {
+  return <OnMount.Provider value={true}>{children}</OnMount.Provider>;
+}
+
+/** `whileInView` on marketing pages, a plain mount animation inside the app. */
+function useEnter<T>(target: T) {
+  return useContext(OnMount) ? { animate: target } : { whileInView: target };
+}
+
 const ease = [0.22, 1, 0.36, 1] as const;
 
-/** Rises into place the first time it scrolls into view (straight away if already visible). */
+/** Rises into place the first time it scrolls into view (straight away if already visible, or inside the app). */
 export function FadeIn({ children, delay = 0, y = 14, className }: { children: ReactNode; delay?: number; y?: number; className?: string }) {
+  const enter = useEnter({ opacity: 1, y: 0 });
   return (
-    <motion.div className={className} initial={{ opacity: 0, y }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.55, delay, ease }}>
+    <motion.div className={className} initial={{ opacity: 0, y }} {...enter} viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.55, delay, ease }}>
       {children}
     </motion.div>
   );
@@ -33,8 +49,9 @@ const item: Variants = {
 /** Children wrapped in <StaggerItem> appear one after another, when the group scrolls into view. */
 export function Stagger({ children, className, as = "div" }: { children: ReactNode; className?: string; as?: "div" | "ul" | "ol" }) {
   const Component = motion[as];
+  const enter = useEnter("show");
   return (
-    <Component className={className} variants={container} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.1 }}>
+    <Component className={className} variants={container} initial="hidden" {...enter} viewport={{ once: true, amount: 0.1 }}>
       {children}
     </Component>
   );

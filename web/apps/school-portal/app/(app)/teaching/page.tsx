@@ -23,7 +23,7 @@ import {
   Video,
 } from "lucide-react";
 import type { TeachingOverview } from "@educloud/api-client";
-import { Avatar, Badge, Card, Countdown, EmptyState, FadeIn, HeroBanner, ProgressBar, SectionHeading, Stagger, StaggerItem, StatCard, bannerButtonClass, buttonClass, cn, firstName, type Translate } from "@educloud/ui";
+import { Avatar, Badge, Card, Countdown, EmptyState, FadeIn, HeroBanner, ProgressBar, SectionHeading, ShowMore, Stagger, StaggerItem, StatCard, bannerButtonClass, buttonClass, cn, firstName, type Translate } from "@educloud/ui";
 import { getContext } from "@educloud/portal-kit/session";
 import { getI18n, getT } from "@educloud/ui/locale";
 import { Meter, ScoreRing } from "@/components/meter";
@@ -121,21 +121,28 @@ export default async function TeachingPage() {
         />
       </FadeIn>
 
-      <Stagger className="mb-10 grid grid-cols-2 gap-4 lg:grid-cols-5">
+      <Stagger className="mb-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
         <StaggerItem>
-          <StatCard label={t("Courses")} value={totals.courses} icon={<BookOpen className="h-5 w-5" />} />
+          <StatCard label={t("Courses")} value={totals.courses} icon={<BookOpen className="h-5 w-5" />} href="/courses" />
         </StaggerItem>
         <StaggerItem>
-          <StatCard label={t("Students")} value={totals.students} icon={<Users className="h-5 w-5" />} />
+          <StatCard label={t("Students")} value={totals.students} icon={<Users className="h-5 w-5" />} href="/rankings" />
         </StaggerItem>
         <StaggerItem>
-          <StatCard label={t("Live lessons this week")} value={totals.lessons_this_week} icon={<Video className="h-5 w-5" />} accent="live" />
+          <StatCard label={t("Live lessons this week")} value={totals.lessons_this_week} icon={<Video className="h-5 w-5" />} accent="live" href="/calendar" />
         </StaggerItem>
         <StaggerItem>
-          <StatCard label={t("Class average")} value={pct(totals.average)} icon={<Target className="h-5 w-5" />} />
+          <StatCard label={t("Class average")} value={pct(totals.average)} icon={<Target className="h-5 w-5" />} meter={totals.average} />
         </StaggerItem>
         <StaggerItem className="col-span-2 lg:col-span-1">
-          <StatCard label={t("Attendance rate")} value={pct(totals.attendance_rate)} icon={<CalendarCheck className="h-5 w-5" />} tone={totals.attendance_rate < 75 ? "danger" : undefined} />
+          <StatCard
+            label={t("Attendance rate")}
+            value={pct(totals.attendance_rate)}
+            icon={<CalendarCheck className="h-5 w-5" />}
+            meter={totals.attendance_rate}
+            tone={totals.attendance_rate < 75 ? "danger" : "success"}
+            href="/attendance"
+          />
         </StaggerItem>
       </Stagger>
 
@@ -372,12 +379,18 @@ export default async function TeachingPage() {
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         {/* At risk */}
         <section aria-labelledby="risk-heading">
-          <SectionHeading title={<span id="risk-heading">{t("Students who need support")}</span>} description={t("Failing a subject or missing too many lessons.")} href="/attendance?status=flagged" linkLabel={t("Attendance")} />
+          <SectionHeading
+            title={
+              <span id="risk-heading" className="inline-flex items-center gap-2">
+                {t("Students who need support")}
+                {at_risk.length > 0 && <Badge tone="danger">{at_risk.length}</Badge>}
+              </span>
+            } description={t("Failing a subject or missing too many lessons.")} href="/attendance?status=flagged" linkLabel={t("Attendance")} />
           {at_risk.length === 0 ? (
             <EmptyState icon={<Sparkles className="h-6 w-6" />} title={t("Everyone is on track")} description={t("No student is failing or over an absence threshold.")} />
           ) : (
             <Card className="p-2">
-              <ul>
+              <ShowMore initial={5}>
                 {at_risk.map((s) => (
                   <li key={s.student_id}>
                     <Link href={`/students/${s.student_id}`} className="flex items-start gap-3 rounded-xl p-3 transition hover:bg-surface-3/70">
@@ -402,7 +415,7 @@ export default async function TeachingPage() {
                     </Link>
                   </li>
                 ))}
-              </ul>
+              </ShowMore>
             </Card>
           )}
         </section>

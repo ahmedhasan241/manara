@@ -1,3 +1,4 @@
+import { Bell } from "lucide-react";
 import { Card, EmptyState, PageHeader, cn } from "@educloud/ui";
 import { getContext } from "@educloud/portal-kit/session";
 import { ToastButton } from "@educloud/portal-kit/toast-button";
@@ -18,6 +19,7 @@ export default async function NotificationsPage() {
   return (
     <>
       <PageHeader
+        icon={<Bell />}
         title={t("Notifications")}
         description={t("{count} unread", { count: unread_count })}
         actions={

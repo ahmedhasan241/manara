@@ -1,3 +1,4 @@
+import { MessageCircle } from "lucide-react";
 import { PageHeader } from "@educloud/ui";
 import { getContext } from "@educloud/portal-kit/session";
 import { Messenger } from "@educloud/portal-kit/messenger";
@@ -14,7 +15,7 @@ export default async function MessagesPage() {
 
   return (
     <>
-      <PageHeader title={t("Messages")} description={t("End-to-end encrypted. Only the people in a conversation can read it.")} />
+      <PageHeader icon={<MessageCircle />} title={t("Messages")} description={t("End-to-end encrypted. Only the people in a conversation can read it.")} />
       <Messenger me={{ id: me.id, name: me.name }} canCreateGroups={isStaff} />
     </>
   );

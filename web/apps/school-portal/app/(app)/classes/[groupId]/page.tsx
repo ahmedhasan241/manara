@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, BookOpen, CalendarCheck, DoorOpen, Layers, Trophy, UserPlus, UserRound, Users } from "lucide-react";
+import { BookOpen, CalendarCheck, DoorOpen, Pencil, Trophy, UserPlus, UserRound, Users } from "lucide-react";
 import { ApiError, type ApiClient, type MemberRow } from "@educloud/api-client";
-import { Avatar, Badge, Card, EmptyState, FadeIn, HeroBanner, SectionHeading, Stagger, StaggerItem, bannerButtonClass, buttonClass } from "@educloud/ui";
+import { Avatar, Badge, Card, EmptyState, PageHeader, SectionHeading, Stagger, StaggerItem, buttonClass } from "@educloud/ui";
 import { getContext } from "@educloud/portal-kit/session";
 import { getI18n, getT } from "@educloud/ui/locale";
 import { ClassStudentsPicker } from "@/components/class-students-picker";
-import { ClassDialog, StructureButton } from "@/components/structure-editor";
+import { StructureLink } from "@/components/structure-editor";
 import { attendanceLabel, attendanceTone, formatScore, isUniversity, pct, stageLabel } from "@/lib/academic";
 
 export async function generateMetadata() {
@@ -37,11 +37,10 @@ export default async function ClassPage({ params }: { params: Promise<{ groupId:
     if (error instanceof ApiError && error.status === 404) notFound();
     throw error;
   });
-  const [students, rankings, attendance, advisors] = await Promise.all([
+  const [students, rankings, attendance] = await Promise.all([
     canManage ? allStudents(api).catch(() => null) : Promise.resolve(null),
     api.rankings({ scope: "group", id: groupId }).catch(() => null),
     api.attendanceReport({ scope: "group", id: groupId, status: "flagged" }).catch(() => null),
-    canManage ? api.members({ role: "teacher" }).then((r) => r.data.map((m) => ({ id: m.user.id, name: m.user.name }))).catch(() => []) : Promise.resolve([]),
   ]);
   const ranks = new Map(rankings?.rows.map((r) => [r.student_id, r]) ?? []);
   const flagged = new Map(attendance?.rows.map((r) => [r.student_id, r]) ?? []);
@@ -49,52 +48,38 @@ export default async function ClassPage({ params }: { params: Promise<{ groupId:
 
   return (
     <>
-      <Link href="/classes" className="mb-6 inline-flex items-center gap-1 text-sm font-semibold text-ink-muted hover:text-ink">
-        <ArrowLeft className="h-4 w-4 rtl:rotate-180" /> {university ? t("Years & sections") : t("Classes & levels")}
-      </Link>
-
-      <FadeIn>
-        <HeroBanner
-          eyebrow={
-            <>
-              <Layers className="h-3.5 w-3.5" /> {[stageLabel(t, group.level.stage), group.level.name, university ? group.level.department : null].filter(Boolean).join(" · ")}
-            </>
-          }
-          title={group.name}
-          meta={
-            <>
-              <span className="inline-flex items-center gap-1.5">
-                <UserRound className="h-4 w-4 text-brand-600 dark:text-brand-300" /> {group.advisor?.name ?? (university ? t("No advisor yet") : t("No class teacher yet"))}
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Users className="h-4 w-4 text-brand-600 dark:text-brand-300" /> {group.capacity ? t("{count} of {capacity} places", { count: group.students.length, capacity: group.capacity }) : t("{count} students", { count: group.students.length })}
-              </span>
-              {group.room && (
-                <span className="inline-flex items-center gap-1.5">
-                  <DoorOpen className="h-4 w-4 text-brand-600 dark:text-brand-300" /> {t("Room {room}", { room: group.room })}
-                </span>
-              )}
-            </>
-          }
-          actions={
-            <>
-              <Link href={`/rankings?scope=group&id=${group.id}`} className={bannerButtonClass()}>
-                <Trophy className="h-4 w-4" /> {t("Class rankings")}
+      <PageHeader
+        back={{ href: "/classes", label: university ? t("Years & sections") : t("Classes & levels") }}
+        icon={<DoorOpen />}
+        title={group.name}
+        description={[stageLabel(t, group.level.stage), group.level.name, university ? group.level.department : null].filter(Boolean).join(" · ")}
+        meta={
+          <>
+            <Badge>
+              <UserRound className="h-3.5 w-3.5" /> {group.advisor?.name ?? (university ? t("No advisor yet") : t("No class teacher yet"))}
+            </Badge>
+            <Badge>
+              <Users className="h-3.5 w-3.5" /> {group.capacity ? t("{count} of {capacity} places", { count: group.students.length, capacity: group.capacity }) : t("{count} students", { count: group.students.length })}
+            </Badge>
+            {group.room && <Badge>{t("Room {room}", { room: group.room })}</Badge>}
+          </>
+        }
+        actions={
+          <>
+            <Link href={`/rankings?scope=group&id=${group.id}`} className={buttonClass("ghost")}>
+              <Trophy className="h-4 w-4" /> {t("Class rankings")}
+            </Link>
+            <Link href={`/attendance?scope=group&id=${group.id}`} className={buttonClass("ghost")}>
+              <CalendarCheck className="h-4 w-4" /> {t("Class attendance")}
+            </Link>
+            {canManage && (
+              <Link href={`/classes/${group.id}/edit`} className={buttonClass("secondary")}>
+                <Pencil className="h-4 w-4" /> {university ? t("Edit section") : t("Edit class")}
               </Link>
-              <Link href={`/attendance?scope=group&id=${group.id}`} className={bannerButtonClass("outline")}>
-                <CalendarCheck className="h-4 w-4" /> {t("Class attendance")}
-              </Link>
-              {canManage && (
-                <ClassDialog levelId={group.academic_level_id} group={group} advisors={advisors} university={university}>
-                  <button type="button" className={bannerButtonClass("outline")}>
-                    {university ? t("Edit section") : t("Edit class")}
-                  </button>
-                </ClassDialog>
-              )}
-            </>
-          }
-        />
-      </FadeIn>
+            )}
+          </>
+        }
+      />
 
       <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_24rem]">
         <div className="min-w-0 space-y-8">
@@ -167,7 +152,7 @@ export default async function ClassPage({ params }: { params: Promise<{ groupId:
               <Card className="text-sm text-ink-muted">
                 {t("No subjects yet. Set the class on a course to teach it here.")}{" "}
                 {can("courses.manage") && (
-                  <Link href="/courses?new=1" className="font-semibold text-brand-600 dark:text-brand-300">
+                  <Link href="/courses/new" className="font-semibold text-brand-600 dark:text-brand-300">
                     {t("Create a course")}
                   </Link>
                 )}
@@ -220,9 +205,7 @@ export default async function ClassPage({ params }: { params: Promise<{ groupId:
 
           {canManage && (
             <Card className="flex items-center gap-3 text-sm">
-              <ClassDialog levelId={group.academic_level_id} group={group} advisors={advisors} university={university}>
-                <StructureButton kind="edit" label={university ? t("Edit section") : t("Edit class")} />
-              </ClassDialog>
+              <StructureLink kind="edit" href={`/classes/${group.id}/edit`} label={university ? t("Edit section") : t("Edit class")} />
               <span className="text-ink-muted">{t("Change the name, room, capacity or class teacher.")}</span>
             </Card>
           )}

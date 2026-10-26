@@ -1,7 +1,6 @@
-import Link from "next/link";
 import { Building2 } from "lucide-react";
 import type { TenantType } from "@educloud/api-client";
-import { CharacterGroup, EmptyState, FadeIn, Stagger, StaggerItem, cn, rich } from "@educloud/ui";
+import { CharacterGroup, EmptyState, FadeIn, FilterChips, Stagger, StaggerItem, rich } from "@educloud/ui";
 import { OrganizationCard } from "@/components/site/market-card";
 import { getViewer } from "@/lib/viewer";
 import { getT } from "@educloud/ui/locale";
@@ -37,18 +36,7 @@ export default async function InstitutionsPage({ searchParams }: { searchParams:
         <CharacterGroup count={4} />
       </FadeIn>
 
-      <nav aria-label={t("Institution type")} className="-mx-1 mb-6 flex gap-2 overflow-x-auto px-1 pb-1">
-        {TYPES.map(([kind, label]) => (
-          <Link
-            key={label}
-            href={kind ? `/institutions?type=${kind}` : "/institutions"}
-            aria-current={selected === kind ? "page" : undefined}
-            className={cn("shrink-0 rounded-full border px-4 py-2 text-sm font-semibold", selected === kind ? "fill-brand border-transparent text-white" : "border-line bg-surface text-ink-muted hover:text-ink")}
-          >
-            {t(label)}
-          </Link>
-        ))}
-      </nav>
+      <FilterChips param="type" label={t("Type")} className="mb-6" options={TYPES.map(([kind, label]) => ({ value: kind, label: t(label) }))} />
 
       {organizations.length === 0 ? (
         <EmptyState icon={<Building2 className="h-6 w-6" />} title={t("Nothing here yet")} />

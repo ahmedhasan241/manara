@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ShieldCheck, ShieldOff } from "lucide-react";
+import { ShieldCheck, ShieldOff } from "lucide-react";
 import { ApiError } from "@educloud/api-client";
 import { serverClient } from "@educloud/api-client/server";
-import { Avatar, Badge, Card, asKey } from "@educloud/ui";
+import { Avatar, Badge, Card, PageHeader, asKey } from "@educloud/ui";
 import { UserControls } from "@/components/user-controls";
 import { getFormat, getT } from "@educloud/ui/locale";
 
@@ -23,29 +23,26 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
 
   return (
     <>
-      <Link href="/users" className="mb-6 inline-flex items-center gap-1 text-sm font-semibold text-ink-muted hover:text-ink">
-        <ArrowLeft className="h-4 w-4" /> {t("All users")}
-      </Link>
-
-      <div className="mb-8 flex flex-wrap items-center gap-4">
-        <Avatar name={user.name} size="lg" />
-        <div>
-          <h1 className="font-display text-3xl font-bold">{user.name}</h1>
-          <p className="text-ink-muted">{user.email}</p>
-        </div>
-        <div className="ms-auto flex gap-2">
-          {user.suspended_at ? <Badge tone="danger">{t("Suspended")}</Badge> : <Badge tone="success">{t("Active")}</Badge>}
-          {user.mfa_enabled ? (
-            <Badge tone="success">
-              <ShieldCheck className="h-3 w-3" /> {t("2FA on")}
-            </Badge>
-          ) : (
-            <Badge>
-              <ShieldOff className="h-3 w-3" /> {t("2FA off")}
-            </Badge>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        back={{ href: "/users", label: t("All users") }}
+        icon={<Avatar name={user.name} size="md" className="!h-11 !w-11" />}
+        title={user.name}
+        description={user.email}
+        meta={
+          <>
+            {user.suspended_at ? <Badge tone="danger">{t("Suspended")}</Badge> : <Badge tone="success">{t("Active")}</Badge>}
+            {user.mfa_enabled ? (
+              <Badge tone="success">
+                <ShieldCheck className="h-3 w-3" /> {t("2FA on")}
+              </Badge>
+            ) : (
+              <Badge>
+                <ShieldOff className="h-3 w-3" /> {t("2FA off")}
+              </Badge>
+            )}
+          </>
+        }
+      />
 
       {user.suspended_at && (
         <Card className="mb-6 border-danger/40 bg-danger/5 text-sm">

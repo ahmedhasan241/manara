@@ -16,8 +16,14 @@ export function ToastForm({
   loading,
   className,
   resetOnSuccess = false,
+  onSuccess,
+  redirectTo,
   children,
 }: {
+  /** Page to open after a success when the result has no href of its own (e.g. back to the record after editing). */
+  redirectTo?: string;
+  /** Called after each success (e.g. to clear state the form doesn't own). */
+  onSuccess?: () => void;
   action: (form: FormData) => Promise<ActionResult<unknown> | void>;
   success?: string;
   loading?: string;
@@ -37,8 +43,10 @@ export function ToastForm({
       const result = await notify.run(() => action(data), { success, loading });
       if (!result || result.ok === false) return;
       if (resetOnSuccess) form.current?.reset();
+      onSuccess?.();
       const href = result.data && typeof result.data === "object" && "href" in result.data ? result.data.href : undefined;
       if (typeof href === "string") router.push(href);
+      else if (redirectTo) router.push(redirectTo);
     });
   }
 

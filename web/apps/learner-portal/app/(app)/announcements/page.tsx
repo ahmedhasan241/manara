@@ -16,7 +16,7 @@ export default async function AnnouncementsPage() {
 
   return (
     <>
-      <PageHeader eyebrow={t("News")} title={t("Announcements")} description={t("From the school and your teachers.")} />
+      <PageHeader icon={<Megaphone />} eyebrow={t("News")} title={t("Announcements")} description={t("From the school and your teachers.")} />
       {announcements.data.length === 0 ? (
         <EmptyState icon={<Megaphone className="h-6 w-6" />} title={t("No announcements yet")} />
       ) : (

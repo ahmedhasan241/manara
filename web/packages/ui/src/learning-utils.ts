@@ -61,7 +61,7 @@ export function tintFor(text: string): Tint {
 /** Buttons that sit on the peach banner (a plain class helper, so server pages can call it). */
 export function bannerButtonClass(variant: "solid" | "outline" = "solid") {
   return cn(
-    "press inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition-colors duration-200",
+    "press inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold sm:px-5 transition-colors duration-200",
     variant === "solid" ? "shine bg-brand-600 text-white shadow-[var(--shadow-glow)] hover:bg-brand-700" : "border border-brand-200 bg-surface text-ink hover:border-brand-300 hover:text-brand-700 dark:border-line dark:hover:text-brand-300",
   );
 }

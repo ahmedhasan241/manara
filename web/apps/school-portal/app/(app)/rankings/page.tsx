@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Crown, Info, Trophy, Users } from "lucide-react";
 import type { RankingRow, Rankings } from "@educloud/api-client";
-import { Avatar, Badge, Card, EmptyState, FadeIn, HeroBanner, Stagger, StaggerItem, cn } from "@educloud/ui";
+import { Avatar, Badge, Card, EmptyState, PageHeader, Stagger, StaggerItem, cn } from "@educloud/ui";
 import { getContext } from "@educloud/portal-kit/session";
 import { getI18n, getT } from "@educloud/ui/locale";
 import { ScopeFilter } from "@/components/scope-filter";
@@ -34,33 +34,27 @@ export default async function RankingsPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <FadeIn>
-        <HeroBanner
-          eyebrow={
+      <PageHeader
+        icon={<Trophy />}
+        eyebrow={rankings?.label ?? workspace.tenant.name}
+        title={t("Rankings")}
+        description={rankings?.grading_scale === "gpa" ? t("Students ranked by GPA. Equal results share a rank.") : t("Students ranked by their average. Equal results share a rank.")}
+        meta={
+          rankings && (
             <>
-              <Trophy className="h-3.5 w-3.5" /> {rankings?.label ?? workspace.tenant.name}
+              <Badge>
+                <Users className="h-3.5 w-3.5" /> {t("{count} students", { count: rankings.total })}
+              </Badge>
+              {structure && (
+                <Badge tone="brand">
+                  <Info className="h-3.5 w-3.5" /> {structure.settings.rankings_visible ? t("Students see the top {count}", { count: structure.settings.rankings_top }) : t("Only staff can see rankings")}
+                </Badge>
+              )}
             </>
-          }
-          title={t("Rankings")}
-          subtitle={rankings?.grading_scale === "gpa" ? t("Students ranked by GPA. Equal results share a rank.") : t("Students ranked by their average. Equal results share a rank.")}
-          meta={
-            rankings && (
-              <>
-                <span className="inline-flex items-center gap-1.5">
-                  <Users className="h-4 w-4 text-brand-600 dark:text-brand-300" /> {t("{count} students", { count: rankings.total })}
-                </span>
-                {structure && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <Info className="h-4 w-4 text-brand-600 dark:text-brand-300" /> {structure.settings.rankings_visible ? t("Students see the top {count}", { count: structure.settings.rankings_top }) : t("Only staff can see rankings")}
-                  </span>
-                )}
-              </>
-            )
-          }
-        />
-      </FadeIn>
-
-      <ScopeFilter scope={scope} id={id} options={options} university={university} />
+          )
+        }
+        toolbar={<ScopeFilter scope={scope} id={id} options={options} university={university} />}
+      />
 
       {!rankings ? (
         <EmptyState icon={<Trophy className="h-6 w-6" />} title={t("Rankings are not available")} description={t("Pick another scope, or check back once grades are in.")} />

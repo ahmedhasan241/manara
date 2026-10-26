@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, BookOpen, Building2, CalendarCheck, DoorOpen, Layers, Plus, School, Settings2, Trophy, UserRound, Users } from "lucide-react";
-import type { AcademicLevel, AcademicStage } from "@educloud/api-client";
-import { Alert, Badge, Card, EmptyState, FadeIn, HeroBanner, SectionHeading, Stagger, StaggerItem, bannerButtonClass, buttonClass, cn } from "@educloud/ui";
+import type { AcademicLevel } from "@educloud/api-client";
+import { Alert, Badge, Card, EmptyState, PageHeader, SectionHeading, Stagger, StaggerItem, buttonClass, cn } from "@educloud/ui";
 import { getContext } from "@educloud/portal-kit/session";
 import { getI18n, getT } from "@educloud/ui/locale";
-import { AcademicSettingsForm, ClassDialog, DeleteStructure, LevelDialog, StructureButton } from "@/components/structure-editor";
+import { AcademicSettingsForm, DeleteStructure, StructureLink } from "@/components/structure-editor";
 import { STAGES, isUniversity, stageLabel } from "@/lib/academic";
 
 export async function generateMetadata() {
@@ -22,65 +22,58 @@ export default async function ClassesPage() {
   if (!can("courses.manage") && !can("members.manage")) notFound();
   const { t } = await getI18n();
   const canManage = can("members.manage");
-  const [structure, advisors] = await Promise.all([
-    api.academicStructure(),
-    canManage ? api.members({ role: "teacher" }).then((r) => r.data.map((m) => ({ id: m.user.id, name: m.user.name }))).catch(() => []) : Promise.resolve([]),
-  ]);
+  const structure = await api.academicStructure();
   const university = isUniversity(structure.type);
-  const stages: AcademicStage[] = structure.stages?.length ? structure.stages : STAGES;
   const classes = structure.levels.reduce((sum, l) => sum + l.groups.length, 0);
-  const nextPosition = Math.max(0, ...structure.levels.map((l) => l.position + 1));
 
   // Group levels by stage, in the stage order, then (for universities) by department.
   const byStage = STAGES.map((stage) => ({ stage, levels: structure.levels.filter((l) => l.stage === stage).sort((a, b) => a.position - b.position || a.name.localeCompare(b.name)) })).filter((g) => g.levels.length > 0);
 
   return (
     <>
-      <FadeIn>
-        <HeroBanner
-          eyebrow={
-            <>
-              <School className="h-3.5 w-3.5" /> {workspace.tenant.name}
-            </>
-          }
-          title={university ? t("Years & sections") : t("Classes & levels")}
-          subtitle={
-            university
-              ? t("Organise your departments into years and sections, assign advisors, and see how each section is doing.")
-              : t("Organise your school into grades and classes, assign class teachers, and see how each class is doing.")
-          }
-          meta={
-            <>
-              <span className="inline-flex items-center gap-1.5">
-                <Layers className="h-4 w-4 text-brand-600 dark:text-brand-300" /> {university ? t("Years: {count}", { count: structure.levels.length }) : t("Levels: {count}", { count: structure.levels.length })}
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <DoorOpen className="h-4 w-4 text-brand-600 dark:text-brand-300" /> {university ? t("Sections: {count}", { count: classes }) : t("Classes: {count}", { count: classes })}
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Users className="h-4 w-4 text-brand-600 dark:text-brand-300" /> {t("{count} students", { count: structure.students_count })}
-              </span>
-            </>
-          }
-          actions={
-            <>
-              {canManage && (
-                <LevelDialog stages={stages} university={university} nextPosition={nextPosition}>
-                  <button type="button" className={bannerButtonClass()}>
-                    <Plus className="h-4 w-4" /> {university ? t("Add a year") : t("Add a level")}
-                  </button>
-                </LevelDialog>
-              )}
-              <Link href="/rankings" className={bannerButtonClass(canManage ? "outline" : "solid")}>
-                <Trophy className="h-4 w-4" /> {t("Rankings")}
+      <PageHeader
+        icon={<School />}
+        eyebrow={workspace.tenant.name}
+        title={university ? t("Years & sections") : t("Classes & levels")}
+        description={
+          university
+            ? t("Organise your departments into years and sections, assign advisors, and see how each section is doing.")
+            : t("Organise your school into grades and classes, assign class teachers, and see how each class is doing.")
+        }
+        meta={
+          <>
+            <Badge>
+              <Layers className="h-3.5 w-3.5" /> {university ? t("Years: {count}", { count: structure.levels.length }) : t("Levels: {count}", { count: structure.levels.length })}
+            </Badge>
+            <Badge>
+              <DoorOpen className="h-3.5 w-3.5" /> {university ? t("Sections: {count}", { count: classes }) : t("Classes: {count}", { count: classes })}
+            </Badge>
+            <Badge>
+              <Users className="h-3.5 w-3.5" /> {t("{count} students", { count: structure.students_count })}
+            </Badge>
+          </>
+        }
+        actions={
+          <>
+            <Link href="/rankings" className={buttonClass("ghost")}>
+              <Trophy className="h-4 w-4" /> {t("Rankings")}
+            </Link>
+            <Link href="/attendance" className={buttonClass("ghost")}>
+              <CalendarCheck className="h-4 w-4" /> {t("Attendance")}
+            </Link>
+            {canManage && structure.levels.length > 0 && (
+              <Link href="/classes/new" className={buttonClass("secondary")}>
+                <Plus className="h-4 w-4" /> {university ? t("Add a section") : t("Add a class")}
               </Link>
-              <Link href="/attendance" className={bannerButtonClass("outline")}>
-                <CalendarCheck className="h-4 w-4" /> {t("Attendance")}
+            )}
+            {canManage && (
+              <Link href="/classes/levels/new" className={buttonClass("primary")}>
+                <Plus className="h-4 w-4" /> {university ? t("Add a year") : t("Add a level")}
               </Link>
-            </>
-          }
-        />
-      </FadeIn>
+            )}
+          </>
+        }
+      />
 
       {structure.unassigned_students > 0 && (
         <div className="mb-6">
@@ -99,11 +92,9 @@ export default async function ClassesPage() {
           description={university ? t("Add your first year of study, then its sections.") : t("Add your first grade or level, then its classes.")}
           action={
             canManage && (
-              <LevelDialog stages={stages} university={university} nextPosition={nextPosition}>
-                <button type="button" className={buttonClass("primary", "sm")}>
-                  <Plus className="h-4 w-4" /> {university ? t("Add a year") : t("Add a level")}
-                </button>
-              </LevelDialog>
+              <Link href="/classes/levels/new" className={buttonClass("primary", "sm")}>
+                <Plus className="h-4 w-4" /> {university ? t("Add a year") : t("Add a level")}
+              </Link>
             )
           }
         />
@@ -114,7 +105,7 @@ export default async function ClassesPage() {
               <SectionHeading title={<span id={`stage-${stage}`}>{stageLabel(t, stage)}</span>} description={university ? t("Years: {count}", { count: levels.length }) : t("Levels: {count}", { count: levels.length })} />
               <div className="space-y-5">
                 {levels.map((level) => (
-                  <LevelCard key={level.id} level={level} canManage={canManage} university={university} stages={stages} advisors={advisors} />
+                  <LevelCard key={level.id} level={level} canManage={canManage} university={university} />
                 ))}
               </div>
             </section>
@@ -140,10 +131,10 @@ export default async function ClassesPage() {
   );
 }
 
-async function LevelCard({ level, canManage, university, stages, advisors }: { level: AcademicLevel; canManage: boolean; university: boolean; stages: AcademicStage[]; advisors: { id: number; name: string }[] }) {
+async function LevelCard({ level, canManage, university }: { level: AcademicLevel; canManage: boolean; university: boolean }) {
   const t = await getT();
   const students = level.groups.reduce((sum, g) => sum + (g.students_count ?? 0), 0);
-  const { groups, ...rest } = level;
+  const { groups } = level;
 
   return (
     <Card className="p-4 shadow-[var(--shadow-soft)] sm:p-5">
@@ -170,12 +161,8 @@ async function LevelCard({ level, canManage, university, stages, advisors }: { l
           </Link>
           {canManage && (
             <>
-              <ClassDialog levelId={level.id} advisors={advisors} university={university}>
-                <StructureButton kind="add" label={university ? t("Add a section") : t("Add a class")} />
-              </ClassDialog>
-              <LevelDialog level={rest} stages={stages} university={university}>
-                <StructureButton kind="edit" label={t("Edit {name}", { name: level.name })} />
-              </LevelDialog>
+              <StructureLink kind="add" href={`/classes/new?level=${level.id}`} label={university ? t("Add a section") : t("Add a class")} />
+              <StructureLink kind="edit" href={`/classes/levels/${level.id}/edit`} label={t("Edit {name}", { name: level.name })} />
               <DeleteStructure kind="level" id={level.id} name={level.name} />
             </>
           )}
@@ -225,9 +212,7 @@ async function LevelCard({ level, canManage, university, stages, advisors }: { l
                 </Link>
                 {canManage && (
                   <div className="absolute end-2 top-2 flex">
-                    <ClassDialog levelId={level.id} group={g} advisors={advisors} university={university}>
-                      <StructureButton kind="edit" label={t("Edit {name}", { name: g.name })} />
-                    </ClassDialog>
+                    <StructureLink kind="edit" href={`/classes/${g.id}/edit`} label={t("Edit {name}", { name: g.name })} />
                     <DeleteStructure kind="class" id={g.id} name={g.name} />
                   </div>
                 )}

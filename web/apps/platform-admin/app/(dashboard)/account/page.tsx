@@ -1,6 +1,6 @@
 import { KeyRound, MapPin, UserRound } from "lucide-react";
 import { serverClient } from "@educloud/api-client/server";
-import { Avatar, Badge, Card, formatLocation } from "@educloud/ui";
+import { Avatar, Badge, Card, PageHeader, formatLocation } from "@educloud/ui";
 import { getI18n, getT } from "@educloud/ui/locale";
 import { PasswordForm, ProfileForm } from "@/components/account-forms";
 
@@ -16,25 +16,23 @@ export default async function AccountPage() {
 
   return (
     <>
-      <div className="banner-brand relative mb-8 overflow-hidden rounded-[1.75rem] p-5 text-white shadow-[var(--shadow-soft)] sm:p-7">
-        <div className="relative flex flex-wrap items-center gap-4">
-          <Avatar name={me.name} size="lg" className="ring-4 ring-white/15" />
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-300">{t("Your account")}</p>
-            <h1 className="truncate font-display text-2xl font-bold sm:text-3xl">{me.name}</h1>
-            {me.headline && <p dir="auto" className="truncate text-white/80">{me.headline}</p>}
-            <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/75">
-              <span dir="ltr" className="truncate">{me.email}</span>
-              {location && (
-                <span className="inline-flex items-center gap-1">
-                  <MapPin className="h-3.5 w-3.5" /> {location}
-                </span>
-              )}
-            </p>
-          </div>
-          <Badge tone="brand">{t("Manara staff")}</Badge>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow={t("Your account")}
+        icon={<Avatar name={me.name} size="md" className="!h-11 !w-11" />}
+        title={me.name}
+        description={me.headline ? <span dir="auto">{me.headline}</span> : undefined}
+        meta={
+          <>
+            <Badge tone="brand">{t("Manara staff")}</Badge>
+            <span dir="ltr" className="truncate text-ink-muted">{me.email}</span>
+            {location && (
+              <span className="inline-flex items-center gap-1 text-ink-muted">
+                <MapPin className="h-3.5 w-3.5" /> {location}
+              </span>
+            )}
+          </>
+        }
+      />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <Card className="p-5 sm:p-6">

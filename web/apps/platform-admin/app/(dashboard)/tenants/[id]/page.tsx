@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink, GraduationCap, HeartHandshake, School, Shield, Users } from "lucide-react";
+import { Building2, ExternalLink, GraduationCap, HeartHandshake, School, Shield, Users } from "lucide-react";
 import { ApiError } from "@educloud/api-client";
 import { serverClient } from "@educloud/api-client/server";
-import { Avatar, Badge, Button, Card, PageHeader, Stagger, StaggerItem, StatCard, asKey, cn } from "@educloud/ui";
+import { Avatar, Badge, Card, FilterChips, PageHeader, Stagger, StaggerItem, StatCard, asKey, buttonClass } from "@educloud/ui";
 import { ChangePlanForm } from "@/components/change-plan-form";
 import { setTenantStatus } from "../../../actions";
 import { ToastButton } from "@/components/toast-button";
@@ -33,16 +33,21 @@ export default async function TenantPage({ params, searchParams }: { params: Pro
 
   return (
     <>
-      <Link href="/tenants" className="mb-6 inline-flex items-center gap-1 text-sm font-semibold text-ink-muted hover:text-ink">
-        <ArrowLeft className="h-4 w-4" /> {t("Schools & teachers")}
-      </Link>
       <PageHeader
-        eyebrow={tenant.type === "teacher" ? t("Teacher / lecturer") : tenant.type}
+        back={{ href: "/tenants", label: t("Schools & teachers") }}
+        icon={<Building2 />}
         title={tenant.name}
         description={`${tenant.slug} · ${t("created {date}", { date: fmt.date(tenant.created_at) })}`}
+        meta={
+          <>
+            <Badge tone="brand">{tenant.type === "teacher" ? t("Teacher / lecturer") : t(asKey(tenant.type))}</Badge>
+            <Badge tone={tenant.status === "active" ? "success" : "danger"}>{t(asKey(tenant.status))}</Badge>
+            {current && <Badge tone={statusTone[current.status]}>{`${current.plan.name} · ${t(asKey(current.status))}`}</Badge>}
+          </>
+        }
         actions={
           <>
-            <a href={siteUrl} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold text-ink-muted ring-1 ring-line hover:text-ink">
+            <a href={siteUrl} target="_blank" rel="noreferrer" className={buttonClass("secondary")}>
               {t("Public site")}{" "}<ExternalLink className="h-4 w-4" />
             </a>
             <ToastButton
@@ -79,17 +84,18 @@ export default async function TenantPage({ params, searchParams }: { params: Pro
             <h2 className="flex items-center gap-2 font-display font-bold">
               <Users className="h-5 w-5 text-brand-500" /> {t("People")}
             </h2>
-            <div className="flex flex-wrap gap-1.5">
-              {["", "owner", "admin", "teacher", "student", "parent"].map((r) => (
-                <Link
-                  key={r}
-                  href={r ? `?role=${r}` : "?"}
-                  className={cn("rounded-full px-3 py-1 text-xs font-semibold capitalize", (role ?? "") === r ? "bg-brand-600 text-white" : "bg-surface-2 text-ink-muted hover:text-ink")}
-                >
-                  {r || "all"}
-                </Link>
-              ))}
-            </div>
+            <FilterChips
+              param="role"
+              label={t("Role")}
+              options={[
+                { label: t("Everyone") },
+                { value: "owner", label: t("Owners") },
+                { value: "admin", label: t("Admins") },
+                { value: "teacher", label: t("Teachers & doctors") },
+                { value: "student", label: t("Students") },
+                { value: "parent", label: t("Parents") },
+              ]}
+            />
           </div>
           <ul className="divide-y divide-line">
             {members.data.map((m) => (

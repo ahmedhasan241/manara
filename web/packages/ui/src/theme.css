@@ -429,6 +429,18 @@
   from { opacity: 0.4; scale: 0.94; }
 }
 
+/* App screens are for scanning: headings and lists are there at once, no scroll reveals. */
+[data-app-main] :is(.reveal, .reveal-children > *, .reveal-fade, .reveal-scale, .reveal-blur, .reveal-tilt, .reveal-tilt-children > *) {
+  animation: none;
+}
+
+/* Scrolling tab rows fade out on the side that hides more tabs. */
+.tabs-fade-end { mask-image: linear-gradient(to right, #000 calc(100% - 3rem), transparent); }
+.tabs-fade-start { mask-image: linear-gradient(to left, #000 calc(100% - 3rem), transparent); }
+.tabs-fade-both { mask-image: linear-gradient(to right, transparent, #000 3rem, #000 calc(100% - 3rem), transparent); }
+[dir="rtl"] .tabs-fade-end { mask-image: linear-gradient(to left, #000 calc(100% - 3rem), transparent); }
+[dir="rtl"] .tabs-fade-start { mask-image: linear-gradient(to right, #000 calc(100% - 3rem), transparent); }
+
 /* Link underline that draws in from the reading side. */
 .link-draw {
   background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0 1.5px;

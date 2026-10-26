@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AlertTriangle, ArrowRight, BookOpen, CalendarCheck, CalendarClock, CalendarDays, CalendarPlus, Inbox, Megaphone, Presentation, Rocket, Users, Video } from "lucide-react";
-import { Badge, BannerArt, Card, Carousel, ContinueCard, Countdown, EmptyState, FadeIn, HeroBanner, SectionHeading, Stagger, StaggerItem, StatCard, asKey, bannerButtonClass, buttonClass, firstName } from "@educloud/ui";
+import { Badge, BannerArt, Card, Countdown, EmptyState, FadeIn, HeroBanner, SectionHeading, Stagger, StaggerItem, StatCard, asKey, bannerButtonClass, buttonClass, firstName } from "@educloud/ui";
 import { getContext } from "@educloud/portal-kit/session";
 import { CourseTile } from "@educloud/portal-kit/course-tile";
 import { formatLessonTime } from "@educloud/portal-kit/lesson-card";
@@ -74,8 +74,27 @@ export default async function DashboardPage() {
         />
       </FadeIn>
 
+      <Stagger className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+        <StaggerItem>
+          <StatCard label={isStaff ? t("Courses") : t("My courses")} value={courses.total} icon={<BookOpen className="h-5 w-5" />} href="/courses" />
+        </StaggerItem>
+        <StaggerItem>
+          <StatCard label={t("Live lessons this week")} value={thisWeek} icon={<Video className="h-5 w-5" />} accent="live" href="/calendar" />
+        </StaggerItem>
+        <StaggerItem>
+          {isStaff ? (
+            <StatCard label={t("Enrollments")} value={enrollments} icon={<Users className="h-5 w-5" />} accent="accent" href={can("members.manage") ? "/people" : undefined} />
+          ) : (
+            <StatCard label={t("Upcoming deadlines")} value={deadlines.length} icon={<CalendarClock className="h-5 w-5" />} accent="accent" />
+          )}
+        </StaggerItem>
+        <StaggerItem>
+          <StatCard label={t("Announcements")} value={announcements.total} icon={<Megaphone className="h-5 w-5" />} accent="amber" href="/announcements" />
+        </StaggerItem>
+      </Stagger>
+
       {teaching && (
-        <FadeIn delay={0.05} className="mb-10">
+        <FadeIn delay={0.05} className="mb-8">
           <Link href="/teaching" className="group flex flex-col gap-4 rounded-[1.25rem] border border-line bg-surface p-4 shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)] sm:flex-row sm:items-center sm:p-5">
             <span className="flex items-center gap-3 sm:flex-1">
               <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl fill-brand text-white">
@@ -107,28 +126,6 @@ export default async function DashboardPage() {
         </FadeIn>
       )}
 
-      {courses.data.length > 0 && (
-        <section aria-labelledby="progress-heading" className="mb-10">
-          <Carousel
-            label={t("Teaching progress")}
-            heading={<SectionHeading title={<span id="progress-heading">{t("Teaching progress")}</span>} description={t("Lessons held so far in each course.")} href="/courses" linkLabel={t("See all")} />}
-          >
-            {courses.data.map((c) => (
-              <ContinueCard
-                key={c.id}
-                href={`/courses/${c.id}`}
-                title={c.title}
-                category={c.category}
-                teacher={c.teacher?.name}
-                done={c.lessons_done_count ?? 0}
-                total={c.lessons_count ?? 0}
-                progressLabel={c.lessons_count ? t("Lesson {done} of {total}").replace("{done}", String(c.lessons_done_count ?? 0)).replace("{total}", String(c.lessons_count)) : t("No lessons yet")}
-              />
-            ))}
-          </Carousel>
-        </section>
-      )}
-
       {isStaff && courses.total === 0 && can("courses.manage") && (
         <FadeIn delay={0.1} className="mb-8">
           <Card className="relative overflow-hidden border-brand-300/60">
@@ -143,7 +140,7 @@ export default async function DashboardPage() {
                   <li>{t("Invite your students and enroll them.")}</li>
                   <li>{t("Schedule a live lesson — it's recorded and added to the course for you.")}</li>
                 </ol>
-                <Link href="/courses?new=1" className={`${buttonClass("primary", "sm")} mt-4`}>
+                <Link href="/courses/new" className={`${buttonClass("primary", "sm")} mt-4`}>
                   {t("Create a course")}
                 </Link>
               </div>
@@ -152,28 +149,14 @@ export default async function DashboardPage() {
         </FadeIn>
       )}
 
-      <Stagger className="mb-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StaggerItem>
-          <StatCard label={isStaff ? t("Courses") : t("My courses")} value={courses.total} icon={<BookOpen className="h-5 w-5" />} />
-        </StaggerItem>
-        <StaggerItem>
-          <StatCard label={t("Live lessons this week")} value={thisWeek} icon={<Video className="h-5 w-5" />} accent="live" />
-        </StaggerItem>
-        <StaggerItem>
-          {isStaff ? (
-            <StatCard label={t("Enrollments")} value={enrollments} icon={<Users className="h-5 w-5" />} accent="accent" />
-          ) : (
-            <StatCard label={t("Upcoming deadlines")} value={deadlines.length} icon={<CalendarClock className="h-5 w-5" />} accent="accent" />
-          )}
-        </StaggerItem>
-        <StaggerItem>
-          <StatCard label={t("Announcements")} value={announcements.total} icon={<Megaphone className="h-5 w-5" />} accent="amber" />
-        </StaggerItem>
-      </Stagger>
-
-      <div className="grid grid-cols-1 gap-8 xl:grid-cols-[1fr_22rem]">
-        <section aria-labelledby="courses-heading">
-          <SectionHeading title={<span id="courses-heading">{isStaff ? t("Courses") : t("My courses")}</span>} href="/courses" linkLabel={t("See all")} />
+      <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <section aria-labelledby="courses-heading" className="min-w-0">
+          <SectionHeading
+            title={<span id="courses-heading">{isStaff ? t("Courses") : t("My courses")}</span>}
+            description={courses.data.length > 0 ? t("Lessons held so far in each course.") : undefined}
+            href="/courses"
+            linkLabel={t("See all")}
+          />
           {courses.data.length === 0 ? (
             <EmptyState icon={<BookOpen className="h-6 w-6" />} title={t("No courses yet")} />
           ) : (
@@ -195,19 +178,37 @@ export default async function DashboardPage() {
                 <p className="p-3 text-sm text-ink-muted">{t("No live lessons scheduled.")}</p>
               ) : (
                 <ul>
-                  {lessons.slice(0, 5).map((l) => (
-                    <li key={l.id}>
-                      <Link href={`/live/${l.id}`} className="flex items-center gap-3 rounded-xl p-3 transition hover:bg-surface-3/70">
-                        <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl text-white ${l.status === "live" ? "bg-live-500" : "banner-brand"}`}>
-                          <Video className="h-4 w-4" />
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm font-semibold">{l.title}</span>
-                          <span className="block text-xs text-ink-muted">{l.status === "live" ? t("Live now") : <Countdown to={l.scheduled_at} />}</span>
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
+                  {lessons.slice(0, 5).map((l) => {
+                    const live = l.status === "live";
+                    return (
+                      <li key={l.id}>
+                        <Link href={`/live/${l.id}`} className="flex items-center gap-3 rounded-xl p-3 transition hover:bg-surface-3/70">
+                          {live ? (
+                            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-live-500 text-white">
+                              <Video className="h-4 w-4" />
+                            </span>
+                          ) : (
+                            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-peach text-center text-brand-700 dark:text-brand-300">
+                              <span className="text-[10px] font-bold uppercase leading-none">{fmt.date(l.scheduled_at, { month: "short" })}</span>
+                              <span className="font-display text-base font-bold leading-none">{fmt.date(l.scheduled_at, { day: "numeric" })}</span>
+                            </span>
+                          )}
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-sm font-semibold">{l.title}</span>
+                            <span className="block truncate text-xs text-ink-muted">
+                              {live ? (
+                                <span className="font-semibold text-live-600">{t("Live now")}</span>
+                              ) : (
+                                <>
+                                  {fmt.time(l.scheduled_at)} · <Countdown to={l.scheduled_at} />
+                                </>
+                              )}
+                            </span>
+                          </span>
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </Card>

@@ -1,7 +1,7 @@
-import { Badge, Button, Card, EmptyState, Field, Input, PageHeader, Select, Textarea, asKey } from "@educloud/ui";
+import Link from "next/link";
+import { Megaphone, Plus } from "lucide-react";
+import { Badge, Card, ClearFilters, EmptyState, FilterBar, FilterChips, PageHeader, SearchField, buttonClass } from "@educloud/ui";
 import { getContext } from "@educloud/portal-kit/session";
-import { ToastForm } from "@educloud/portal-kit/toast-form";
-import { createAnnouncement } from "../../actions";
 import { getFormat, getI18n, getT } from "@educloud/ui/locale";
 
 export async function generateMetadata() {
@@ -9,67 +9,60 @@ export async function generateMetadata() {
   return { title: t("Announcements") };
 }
 
-export default async function AnnouncementsPage() {
+const PRIORITIES = ["normal", "important", "urgent"] as const;
+
+export default async function AnnouncementsPage({ searchParams }: { searchParams: Promise<{ search?: string; priority?: string }> }) {
   const fmt = await getFormat();
   const { api, can } = await getContext();
   const { t } = await getI18n();
-  const [announcements, courses] = await Promise.all([api.announcements(), can("announcements.write") ? api.courses() : null]);
+  const { search, priority } = await searchParams;
+  const announcements = await api.announcements();
+  // The API has no search or priority filter, so the list is narrowed here.
+  const query = search?.trim().toLowerCase();
+  const matching = announcements.data.filter((a) => !query || `${a.title} ${a.body}`.toLowerCase().includes(query));
+  const shown = matching.filter((a) => !priority || a.priority === priority);
 
   return (
     <>
-      <PageHeader title={t("Announcements")} />
+      <PageHeader
+        icon={<Megaphone />}
+        title={t("Announcements")}
+        description={t("From the school and your teachers.")}
+        actions={
+          can("announcements.write") && (
+            <Link href="/announcements/new" className={buttonClass("primary")}>
+              <Plus className="h-4 w-4" /> {t("New announcement")}
+            </Link>
+          )
+        }
+        toolbar={
+          <FilterBar
+            search={<SearchField placeholder={t("Search announcements")} />}
+            chips={
+              <FilterChips
+                param="priority"
+                label={t("Priority")}
+                options={[
+                  { label: t("All"), count: matching.length },
+                  ...PRIORITIES.map((p) => ({ value: p, label: { normal: t("Normal"), important: t("Important"), urgent: t("Urgent") }[p], count: matching.filter((a) => a.priority === p).length, tone: p === "urgent" ? ("danger" as const) : p === "important" ? ("warning" as const) : undefined })),
+                ]}
+              />
+            }
+            summary={(search || priority) && <ClearFilters params={["search", "priority"]} />}
+          />
+        }
+      />
 
-      {courses && (
-        <Card className="mb-6">
-          <h2 className="mb-3 font-semibold">{t("New announcement")}</h2>
-          <ToastForm action={createAnnouncement} loading={t("Posting…")} resetOnSuccess className="grid gap-4 sm:grid-cols-3">
-            <div className="sm:col-span-2">
-              <Field label={t("Title")} htmlFor="title">
-                <Input id="title" name="title" required />
-              </Field>
-            </div>
-            <Field label={t("Audience")} htmlFor="course_id">
-              <Select id="course_id" name="course_id" defaultValue="">
-                <option value="">{t("Everyone in the school")}</option>
-                {courses.data.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.title}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <div className="sm:col-span-3">
-              <Field label={t("Message")} htmlFor="body">
-                <Textarea id="body" name="body" rows={4} required />
-              </Field>
-            </div>
-            <Field label={t("Priority")} htmlFor="priority" hint={t("Urgent also sends an email.")}>
-              <Select id="priority" name="priority" defaultValue="normal">
-                <option value="normal">{t("Normal")}</option>
-                <option value="important">{t("Important")}</option>
-                <option value="urgent">{t("Urgent")}</option>
-              </Select>
-            </Field>
-            <Field label={t("Deadline (optional)")} htmlFor="deadline_at">
-              <Input id="deadline_at" name="deadline_at" type="datetime-local" />
-            </Field>
-            <div className="sm:self-end">
-              <Button type="submit">{t("Publish")}</Button>
-            </div>
-          </ToastForm>
-        </Card>
-      )}
-
-      {announcements.data.length === 0 ? (
-        <EmptyState title={t("No announcements yet")} />
+      {shown.length === 0 ? (
+        <EmptyState icon={<Megaphone className="h-6 w-6" />} title={search || priority ? t("No announcements match") : t("No announcements yet")} />
       ) : (
         <ul className="space-y-3">
-          {announcements.data.map((a) => (
+          {shown.map((a) => (
             <li key={a.id}>
               <Card>
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="font-semibold">{a.title}</h2>
-                  {a.priority !== "normal" && <Badge tone={a.priority === "urgent" ? "danger" : "warning"}>{t(asKey(a.priority))}</Badge>}
+                  {a.priority !== "normal" && <Badge tone={a.priority === "urgent" ? "danger" : "warning"}>{a.priority === "urgent" ? t("Urgent") : t("Important")}</Badge>}
                   {a.course && <Badge tone="brand">{a.course.title}</Badge>}
                 </div>
                 <p className="mt-2 whitespace-pre-line text-sm">{a.body}</p>

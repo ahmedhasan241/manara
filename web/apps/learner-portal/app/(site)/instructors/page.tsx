@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Search, SearchX } from "lucide-react";
-import { Stagger, StaggerItem, Swoosh, asKey, buttonClass, cn, rich } from "@educloud/ui";
+import { ClearFilters, FilterBar, FilterChips, FilterSelect, Stagger, StaggerItem, Swoosh, asKey, buttonClass, cn, rich } from "@educloud/ui";
 import { getT } from "@educloud/ui/locale";
 import { InstructorCard } from "@/components/site/instructor-card";
 import { getViewer } from "@/lib/viewer";
@@ -29,13 +29,6 @@ export default async function InstructorsPage({ searchParams }: { searchParams: 
   const [instructors, everyone] = await Promise.all([api.catalogInstructors({ search, type, category }), api.catalogInstructors()]);
   const categories = [...new Set(everyone.flatMap((i) => i.categories))].sort();
 
-  // Builds a link that changes one filter and keeps the others.
-  const href = (change: Record<string, string | undefined>) => {
-    const query = new URLSearchParams(Object.entries({ search, type, category, ...change }).filter((e): e is [string, string] => !!e[1]));
-    return `/instructors${query.size ? `?${query}` : ""}`;
-  };
-  const chip = (active: boolean) =>
-    cn("press shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-colors", active ? "border-transparent bg-brand-600 text-white" : "border-line bg-surface text-ink-muted hover:border-brand-300 hover:text-ink");
 
   return (
     <>
@@ -62,30 +55,19 @@ export default async function InstructorsPage({ searchParams }: { searchParams: 
           </button>
         </form>
 
-        <nav aria-label={t("Categories")} className="mt-10 space-y-3">
-          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:justify-center sm:px-0">
-            <Link href={href({ type: undefined })} className={chip(!type)} aria-current={!type || undefined}>
-              {t("All teachers")}
-            </Link>
-            {KINDS.map((k) => (
-              <Link key={k.value} href={href({ type: k.value })} className={chip(type === k.value)} aria-current={type === k.value || undefined}>
-                {t(k.label)}
-              </Link>
-            ))}
-          </div>
-          {categories.length > 1 && (
-            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:justify-center sm:px-0">
-              <Link href={href({ category: undefined })} className={cn(chip(!category), "py-1.5 text-xs")}>
-                {t("All")}
-              </Link>
-              {categories.map((c) => (
-                <Link key={c} href={href({ category: c })} className={cn(chip(category === c), "py-1.5 text-xs")}>
-                  {t(asKey(c))}
-                </Link>
-              ))}
-            </div>
-          )}
-        </nav>
+        <FilterBar
+          className="mt-10"
+          chips={<FilterChips param="type" label={t("Type")} options={[{ label: t("All teachers") }, ...KINDS.map((k) => ({ value: k.value, label: t(k.label) }))]} />}
+          filters={categories.length > 1 && <FilterSelect param="category" label={t("Subject")} allLabel={t("All")} options={categories.map((c) => ({ value: c, label: t(asKey(c)) }))} />}
+          summary={
+            (search || type || category) && (
+              <>
+                <span>{t("{count} teachers & doctors", { count: instructors.length })}</span>
+                <ClearFilters params={["search", "type", "category"]} />
+              </>
+            )
+          }
+        />
 
         {instructors.length > 0 ? (
           <Stagger className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

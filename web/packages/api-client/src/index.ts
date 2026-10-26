@@ -281,6 +281,7 @@ export function createClient({ baseUrl, token, tenant, student, locale, currency
     attendanceSummary: (courseId: string) => get<AttendanceSummaryRow[]>(`/courses/${courseId}/attendance/summary`),
     materials: (courseId: string) => get<Material[]>(`/courses/${courseId}/materials`),
     uploadMaterial: (courseId: string, form: FormData) => request<Material>("POST", `/courses/${courseId}/materials`, form),
+    deleteMaterial: (id: string) => request<void>("DELETE", `/materials/${id}`),
     announcements: () => get<Paginated<Announcement>>("/announcements"),
     createAnnouncement: (data: Pick<Announcement, "title" | "body"> & Partial<Announcement> & { course_id?: string }) =>
       request<Announcement>("POST", "/announcements", data),

@@ -4,6 +4,7 @@ import { LiveNotifications } from "@educloud/portal-kit/live-notifications";
 import { LiveNowBanner } from "@educloud/portal-kit/live-now-banner";
 import { OfflineSync } from "@/components/offline-sync";
 import { SignOutButton } from "@/components/sign-out-button";
+import { logout } from "@/app/actions";
 import { getI18n, getT } from "@educloud/ui/locale";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -21,61 +22,63 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const canResults = canTeach || can("reports.view") || can("members.manage");
   const university = workspace.tenant.type === "university";
 
-  const nav: ShellNavGroup[] = [
+  // Settings sits with the account at the bottom of the sidebar, not in the menu.
+  const groups: ShellNavGroup[] = [
     {
-      label: t("Teach"),
       items: [
         { href: "/", label: t("Dashboard"), icon: "dashboard" },
         ...(canTeach ? [{ href: "/teaching", label: t("My teaching"), icon: "teaching" as const }] : []),
+      ],
+    },
+    {
+      label: t("Teach"),
+      items: [
         { href: "/courses", label: t("Courses"), icon: "courses" },
         { href: "/live", label: t("Live lessons"), icon: "live", badge: liveNow.length ? "live" : undefined },
         { href: "/calendar", label: t("Calendar"), icon: "calendar" },
-        { href: "/messages", label: t("Messages"), icon: "messages" },
       ],
     },
-    ...(canStructure || canResults
-      ? [
-          {
-            label: t("Academics"),
-            items: [
-              ...(canStructure ? [{ href: "/classes", label: university ? t("Years & sections") : t("Classes"), icon: "classes" as const }] : []),
-              ...(canResults ? [{ href: "/rankings", label: t("Rankings"), icon: "rankings" as const }] : []),
-              ...(canResults ? [{ href: "/attendance", label: t("Attendance"), icon: "attendance" as const }] : []),
-            ],
-          },
-        ]
-      : []),
+    {
+      label: t("Academics"),
+      items: [
+        ...(canStructure ? [{ href: "/classes", label: university ? t("Years & sections") : t("Classes"), icon: "classes" as const }] : []),
+        ...(canResults ? [{ href: "/attendance", label: t("Attendance"), icon: "attendance" as const }] : []),
+        ...(canResults ? [{ href: "/rankings", label: t("Rankings"), icon: "rankings" as const }] : []),
+        ...(can("reports.view") ? [{ href: "/analytics", label: t("Analytics"), icon: "analytics" as const }] : []),
+      ],
+    },
     {
       label: t("Stay informed"),
       items: [
+        { href: "/messages", label: t("Messages"), icon: "messages" },
         { href: "/announcements", label: t("Announcements"), icon: "announcements" },
         { href: "/notifications", label: t("Notifications"), icon: "notifications", badge: notifications.unread_count || undefined },
       ],
     },
     {
-      label: t("Workspace"),
+      label: t("Online courses"),
       items: [
-        ...(can("reports.view") ? [{ href: "/analytics", label: t("Analytics"), icon: "analytics" as const }] : []),
-        { href: "/reviews", label: t("Reviews"), icon: "reviews" },
         ...(can("courses.manage") ? [{ href: "/sales", label: t("Online sales"), icon: "plans" as const }] : []),
         ...(can("courses.manage") ? [{ href: "/coupons", label: t("Discount codes"), icon: "coupons" as const }] : []),
-        ...(can("members.manage") ? [{ href: "/people", label: t("People"), icon: "people" as const }] : []),
-        { href: "/settings", label: t("Settings"), icon: "settings" },
+        { href: "/reviews", label: t("Reviews"), icon: "reviews" },
       ],
     },
+    ...(can("members.manage") ? [{ label: t("Workspace"), items: [{ href: "/people", label: t("People"), icon: "people" as const }] }] : []),
   ];
+  const nav = groups.filter((g) => g.items.length > 0);
 
   const commands: CommandItem[] = [
     ...(can("courses.manage")
       ? [
-          { id: "schedule", label: t("Schedule a live lesson"), href: "/live", group: "actions" as const, keywords: "zoom lecture meeting" },
-          { id: "course", label: t("Create a course"), href: "/courses?new=1", group: "actions" as const },
+          { id: "schedule", label: t("Schedule a live lesson"), href: "/live/new", group: "actions" as const, keywords: "zoom lecture meeting" },
+          { id: "course", label: t("Create a course"), href: "/courses/new", group: "actions" as const },
         ]
       : []),
-    ...(can("announcements.write") ? [{ id: "announce", label: t("Post an announcement"), href: "/announcements", group: "actions" as const }] : []),
+    ...(can("announcements.write") ? [{ id: "announce", label: t("Post an announcement"), href: "/announcements/new", group: "actions" as const }] : []),
     { id: "message", label: t("Send a message"), href: "/messages", group: "actions" },
     ...(canTeach ? [{ id: "teaching", label: t("My teaching"), href: "/teaching", group: "actions" as const, keywords: "today plan homework marking at risk" }] : []),
-    ...(can("members.manage") ? [{ id: "classes", label: university ? t("Add a year or section") : t("Add a level or class"), href: "/classes", group: "actions" as const, keywords: "grade level class section year structure" }] : []),
+    ...(can("members.manage") ? [{ id: "person", label: t("Add person"), href: "/people/new", group: "actions" as const, keywords: "student teacher parent invite" }] : []),
+    ...(can("members.manage") ? [{ id: "classes", label: university ? t("Add a year or section") : t("Add a level or class"), href: "/classes/new", group: "actions" as const, keywords: "grade level class section year structure" }] : []),
     ...(canResults
       ? [
           { id: "rankings", label: t("See rankings"), href: "/rankings", group: "actions" as const, keywords: "top students leaderboard gpa average" },
@@ -101,7 +104,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       commands={commands}
       signOut={signOut}
       bottomNav={["/", "/courses", "/live", "/messages"]}
-      footer={<SignOutButton variant="icon" />}
+      signOutAction={logout}
       banner={<LiveNowBanner userId={me.id} initial={liveNow} />}
     >
       {isStaff && <OfflineSync offlineMessage={t("You're offline. Changes are saved on this device and will sync automatically.")} />}

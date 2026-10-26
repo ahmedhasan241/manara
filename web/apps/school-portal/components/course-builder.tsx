@@ -1,6 +1,6 @@
-import { ArrowDown, ArrowUp, Eye, EyeOff, ExternalLink, FileText, Globe2, PlayCircle, Plus, Rocket, Trash2, Users } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, Eye, EyeOff, ExternalLink, FileText, Globe2, PlayCircle, Plus, Rocket, Trash2, Users } from "lucide-react";
 import type { CourseMarketplaceSettings, CurriculumSection } from "@educloud/api-client";
-import { Badge, Card, Field, Input, Select, Textarea, asKey, buttonClass, cn, rich } from "@educloud/ui";
+import { Badge, Card, Field, Input, Select, Textarea, asKey, buttonClass, cn } from "@educloud/ui";
 import { ToastButton } from "@educloud/portal-kit/toast-button";
 import { ToastForm } from "@educloud/portal-kit/toast-form";
 import { ActionForm } from "./action-form";
@@ -21,11 +21,20 @@ export async function CourseBuilder({ courseId, settings, curriculum, students }
   const lectures = curriculum.flatMap((s) => s.lectures);
   const published = settings.marketplace_status === "published";
   const minutes = Math.round(lectures.reduce((s, l) => s + l.duration_seconds, 0) / 60);
+  // What a good listing needs. Only the first is required to publish.
+  const checks = [
+    { label: t("Add at least one lecture"), done: lectures.length > 0, required: true },
+    { label: t("Subtitle and description"), done: !!settings.subtitle && !!settings.description },
+    { label: t("What learners will learn"), done: (settings.outcomes ?? []).length > 0 },
+    { label: t("A free preview lecture"), done: lectures.some((l) => l.is_preview) },
+  ];
+  const ready = checks.every((c) => !c.required || c.done);
 
   return (
     <div className="space-y-8">
       {/* Status */}
-      <Card className="flex flex-wrap items-center gap-4 p-5">
+      <Card className="p-5">
+      <div className="flex flex-wrap items-center gap-4">
         <span className={cn("grid h-12 w-12 shrink-0 place-items-center rounded-2xl", published ? "bg-mint text-brand-700 dark:text-brand-300" : "bg-peach text-brand-700 dark:text-brand-300")}>
           {published ? <Globe2 className="h-6 w-6" /> : <Rocket className="h-6 w-6" />}
         </span>
@@ -46,15 +55,35 @@ export async function CourseBuilder({ courseId, settings, curriculum, students }
               <ExternalLink className="h-4 w-4" /> {t("View public page")}
             </a>
           )}
-          <ActionForm action={setPublished.bind(null, courseId, !published)} submit={published ? t("Unpublish") : t("Publish course")} className="flex flex-wrap items-center gap-2 space-y-0 [&>[role=alert]]:order-last [&>[role=alert]]:basis-full" submitClassName={published ? "!bg-none !bg-surface-3 !text-ink !shadow-none" : ""}>
-            {null}
-          </ActionForm>
+          {published || ready ? (
+            <ActionForm action={setPublished.bind(null, courseId, !published)} submit={published ? t("Unpublish") : t("Publish course")} className="flex flex-wrap items-center gap-2 space-y-0 [&>[role=alert]]:order-last [&>[role=alert]]:basis-full" submitClassName={published ? "!bg-none !bg-surface-3 !text-ink !shadow-none" : ""}>
+              {null}
+            </ActionForm>
+          ) : (
+            <span className={cn(buttonClass("primary"), "pointer-events-none opacity-55")} aria-disabled title={t("Add at least one lecture")}>
+              {t("Publish course")}
+            </span>
+          )}
         </div>
+      </div>
+      {!published && (
+        <ul className="mt-4 grid gap-2 border-t border-line pt-4 sm:grid-cols-2">
+          {checks.map((c) => (
+            <li key={c.label} className={cn("flex items-center gap-2 text-sm", c.done ? "text-ink-muted" : "text-ink")}>
+              <span className={cn("grid h-5 w-5 shrink-0 place-items-center rounded-full", c.done ? "bg-success text-white" : c.required ? "border-2 border-brand-500" : "border-2 border-line")}>
+                {c.done && <Check className="h-3 w-3" />}
+              </span>
+              <span className={cn(c.done && "line-through decoration-ink-muted/40")}>{c.label}</span>
+              {c.required && !c.done && <Badge tone="brand">{t("Required")}</Badge>}
+            </li>
+          ))}
+        </ul>
+      )}
       </Card>
 
-      <div className="grid grid-cols-1 gap-8 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+      <div className="grid grid-cols-1 gap-8 2xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
         {/* Landing page & price */}
-        <Card className="h-fit p-5 sm:p-6">
+        <Card className="h-fit p-5 sm:p-6 2xl:order-last">
           <h2 className="mb-1 font-display text-lg font-bold">{t("Landing page & price")}</h2>
           <p className="mb-5 text-sm text-ink-muted">{t("What learners see before they buy.")}</p>
           <ActionForm action={saveMarketplace.bind(null, courseId)} submit={t("Save details")}>
@@ -105,8 +134,8 @@ export async function CourseBuilder({ courseId, settings, curriculum, students }
           </ActionForm>
         </Card>
 
-        {/* Curriculum */}
-        <div className="space-y-4">
+        {/* Curriculum: first, since a course needs lectures before anything else matters */}
+        <div className="order-first space-y-4 2xl:order-none">
           <div>
             <h2 className="font-display text-lg font-bold">{t("Curriculum")}</h2>
             <p className="text-sm text-ink-muted">{t("Sections hold lectures: upload a video, paste a YouTube/Vimeo/MP4 link, or write an article. Mark a lecture as a free preview to let anyone watch it.")}</p>
@@ -201,11 +230,6 @@ export async function CourseBuilder({ courseId, settings, curriculum, students }
             </ActionForm>
           </Card>
 
-          {lectures.length > 0 && !published && (
-            <p className="rounded-xl bg-sky px-4 py-3 text-sm text-ink-muted">
-              {rich(t("Ready? Tick “List this course on the Manara website”, save, then press <b>Publish course</b>."), { b: (w) => <strong>{w}</strong> })}
-            </p>
-          )}
         </div>
       </div>
     </div>

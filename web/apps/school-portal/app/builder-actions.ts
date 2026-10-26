@@ -36,7 +36,8 @@ export async function saveMarketplace(courseId: string, _state: ActionState, for
 
 export async function setPublished(courseId: string, publish: boolean, _state: ActionState): Promise<ActionState> {
   const t = await getT();
-  return attempt((api) => api.updateMarketplace(courseId, { publish }), {
+  // Publishing lists the course too, so it's one click instead of tick, save, publish.
+  return attempt((api) => api.updateMarketplace(courseId, publish ? { is_public: true, publish } : { publish }), {
     message: publish ? t("Published! Learners can now find and buy this course.") : t("Moved back to draft."),
     paths: [`/courses/${courseId}`],
   });

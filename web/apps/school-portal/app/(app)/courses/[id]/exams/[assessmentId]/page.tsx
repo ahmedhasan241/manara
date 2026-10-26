@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarClock, ClipboardCheck, Inbox, ListChecks, Repeat, Timer, Users } from "lucide-react";
 import { ApiError, type ExamAttemptStatus } from "@educloud/api-client";
-import { Badge, Card, EmptyState, HeroBanner, StatCard, Tabs, asKey, buttonClass } from "@educloud/ui";
+import { Badge, Card, EmptyState, PageHeader, StatCard, Tabs, asKey, buttonClass } from "@educloud/ui";
 import { getContext } from "@educloud/portal-kit/session";
 import { getFormat, getI18n, getT } from "@educloud/ui/locale";
 import { ExamBuilder } from "@/components/exam-builder";
@@ -45,18 +45,11 @@ export default async function ExamPage({ params, searchParams }: { params: Promi
 
   return (
     <>
-      <Link href={`/courses/${id}?tab=grades`} className="mb-6 inline-flex items-center gap-1 text-sm font-semibold text-ink-muted hover:text-ink">
-        <ArrowLeft className="h-4 w-4 rtl:rotate-180" /> {course.title}
-      </Link>
-
-      <HeroBanner
-        eyebrow={
-          <>
-            <ListChecks className="h-3.5 w-3.5" /> {t("Online exam")}
-          </>
-        }
+      <PageHeader
+        back={{ href: `/courses/${id}?tab=grades`, label: course.title }}
+        icon={<ListChecks />}
         title={exam.title}
-        subtitle={exam.is_online ? t("Students take this exam online in the learner portal and most answers are marked for them.") : t("Not online yet: add questions and save to let students take it online.")}
+        description={exam.is_online ? t("Students take this exam online in the learner portal and most answers are marked for them.") : t("Not online yet: add questions and save to let students take it online.")}
         meta={
           <>
             <Badge>{t(asKey(exam.type))}</Badge>

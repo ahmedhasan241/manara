@@ -90,17 +90,17 @@ export function HeroBanner({
   className?: string;
 }) {
   return (
-    <section className={cn("band-peach animate-rise-in relative isolate mb-8 overflow-hidden rounded-[1.75rem] border border-brand-100 p-6 text-ink sm:p-8 dark:border-line", className)}>
-      <div aria-hidden className="absolute -end-20 -top-24 -z-10 h-72 w-72 rounded-full border-2 border-dashed border-brand-200 dark:border-brand-900" />
-      <div className="flex flex-col gap-6 md:flex-row md:items-center">
+    <section className={cn("band-peach animate-rise-in relative isolate mb-6 overflow-hidden rounded-[1.5rem] border border-brand-100 p-5 text-ink sm:p-7 dark:border-line", className)}>
+      <div aria-hidden className="absolute -end-16 -top-20 -z-10 h-56 w-56 rounded-full bg-brand-200/35 blur-2xl dark:bg-brand-900/40" />
+      <div className="flex flex-col gap-5 md:flex-row md:items-center">
         <div className="min-w-0 flex-1">
-          {eyebrow && <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-surface px-3 py-1 text-xs font-semibold text-brand-700 shadow-[var(--shadow-soft)] dark:text-brand-300">{eyebrow}</p>}
-          <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl lg:text-[2.1rem] lg:leading-tight">{title}</h1>
-          {subtitle && <p className="mt-2 max-w-2xl text-base text-ink-muted">{subtitle}</p>}
-          {meta && <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-ink">{meta}</div>}
-          {actions && <div className="mt-6 flex flex-wrap gap-3">{actions}</div>}
+          {eyebrow && <p className="mb-2.5 inline-flex items-center gap-2 rounded-full bg-surface px-3 py-1 text-xs font-semibold text-brand-700 shadow-[var(--shadow-soft)] dark:text-brand-300">{eyebrow}</p>}
+          <h1 className="font-display text-2xl font-bold tracking-tight sm:text-[1.75rem] sm:leading-tight lg:text-[2rem]">{title}</h1>
+          {subtitle && <p className="mt-1.5 max-w-2xl text-sm text-ink-muted sm:text-base">{subtitle}</p>}
+          {meta && <div className="mt-3.5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-ink">{meta}</div>}
+          {actions && <div className="mt-5 flex flex-wrap gap-2.5">{actions}</div>}
         </div>
-        {art && <div className="hidden shrink-0 animate-rise-in [animation-delay:0.55s] md:block">{art}</div>}
+        {art && <div className="hidden shrink-0 animate-rise-in [animation-delay:0.55s] lg:block [&>*]:origin-center [&>*]:scale-90">{art}</div>}
       </div>
     </section>
   );

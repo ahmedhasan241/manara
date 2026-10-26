@@ -18,6 +18,7 @@ export default async function NotificationsPage() {
   return (
     <>
       <PageHeader
+        icon={<Bell />}
         title={t("Notifications")}
         description={t("{count} unread", { count: unread_count })}
         actions={

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CreditCard } from "lucide-react";
 import { serverClient } from "@educloud/api-client/server";
-import { Badge, Card, EmptyState, PageHeader, cn } from "@educloud/ui";
+import { Badge, Card, EmptyState, FilterChips, PageHeader, Pagination } from "@educloud/ui";
 import { SubscriptionActions } from "@/components/subscription-actions";
 import { getFormat, getT } from "@educloud/ui/locale";
 
@@ -29,22 +29,23 @@ export default async function SubscriptionsPage({ searchParams }: { searchParams
 
   return (
     <>
-      <PageHeader eyebrow={t("Customers")} title={t("Subscriptions")} description={t("Each workspace's current package. Extend trials, activate manual payments, or cancel.")} />
-
-      <div className="mb-6 flex flex-wrap gap-2">
-        {FILTERS.map((f) => (
-          <Link
-            key={f.value}
-            href={f.value ? `?status=${f.value}` : "?"}
-            className={cn(
-              "rounded-full px-4 py-1.5 text-sm font-semibold transition",
-              (status ?? "") === f.value ? "bg-brand-600 text-white" : "bg-surface text-ink-muted ring-1 ring-line hover:text-ink",
-            )}
-          >
-            {t(f.label)}
-          </Link>
-        ))}
-      </div>
+      <PageHeader
+        eyebrow={t("Customers")}
+        icon={<CreditCard />}
+        title={t("Subscriptions")}
+        description={t("Each workspace's current package. Extend trials, activate manual payments, or cancel.")}
+        toolbar={
+          <FilterChips
+            param="status"
+            label={t("Status")}
+            options={FILTERS.map((f) => ({
+              value: f.value || undefined,
+              label: t(f.label),
+              tone: f.value === "active" ? "success" : f.value === "past_due" || f.value === "trial_ending" ? "warning" : f.value === "canceled" ? "danger" : undefined,
+            }))}
+          />
+        }
+      />
 
       {subs.data.length === 0 ? (
         <EmptyState icon={<CreditCard className="h-6 w-6" />} title={t("No subscriptions match")} />
@@ -91,6 +92,7 @@ export default async function SubscriptionsPage({ searchParams }: { searchParams
           </table>
         </Card>
       )}
+      <Pagination page={subs.current_page} pages={subs.last_page} total={subs.total} />
     </>
   );
 }

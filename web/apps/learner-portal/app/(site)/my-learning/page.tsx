@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Award, BookOpen, CheckCircle2, PartyPopper, PlayCircle, Receipt } from "lucide-react";
-import { Badge, Character, ContinueCard, EmptyState, FadeIn, ProgressBar, Stagger, StaggerItem, asKey, buttonClass, cn, firstName } from "@educloud/ui";
+import { Badge, Character, ContinueCard, EmptyState, FadeIn, ProgressBar, Stagger, Tabs, StaggerItem, asKey, buttonClass, firstName } from "@educloud/ui";
 import { AuthRequired } from "@/components/site/auth-required";
 import { LearningGoal } from "@/components/site/learning-goal";
 import { getViewer } from "@/lib/viewer";
@@ -66,21 +66,7 @@ export default async function MyLearningPage({ searchParams }: { searchParams: P
         </div>
       )}
 
-      <nav aria-label={t("My learning sections")} className="-mx-1 mb-6 flex gap-2 overflow-x-auto px-1 pb-1">
-        {TABS.map(([key, label]) => (
-          <Link
-            key={key}
-            href={key === "all" ? "/my-learning" : `/my-learning?tab=${key}`}
-            aria-current={tab === key ? "page" : undefined}
-            className={cn(
-              "shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition",
-              tab === key ? "fill-brand border-transparent text-white" : "border-line bg-surface text-ink-muted hover:text-ink",
-            )}
-          >
-            {t(label)}
-          </Link>
-        ))}
-      </nav>
+      <Tabs id="my-learning" active={tab} tabs={TABS.map(([key, label]) => ({ key, label: t(label), href: key === "all" ? "/my-learning" : `/my-learning?tab=${key}` }))} />
 
       {tab === "certificates" ? (
         certificates.length === 0 ? (
