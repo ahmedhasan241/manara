@@ -1,3 +1,4 @@
+import { formatCurrencyParts } from "@educloud/api-client";
 import { intlLocale, type Locale } from "./i18n";
 import type { MessageKey } from "./i18n/catalog/keys";
 
@@ -57,7 +58,7 @@ export type Rates = Record<string, number>;
 export function createFormatters(locale: Locale, currency = "USD", rates?: Rates): Formatters {
   const tag = intlLocale(locale);
   const format = (amount: number, code: string, fractions: number) =>
-    new Intl.NumberFormat(tag, { style: "currency", currency: code, minimumFractionDigits: fractions, maximumFractionDigits: fractions }).format(amount);
+    formatCurrencyParts(new Intl.NumberFormat(tag, { style: "currency", currency: code, minimumFractionDigits: fractions, maximumFractionDigits: fractions }), amount);
   const exactMoney = (cents: number, code: string) => format(cents / 100, code, cents % 100 === 0 ? 0 : 2);
   const relative = new Intl.RelativeTimeFormat(tag, { numeric: "auto" });
 

@@ -16,6 +16,17 @@ export const CURRENCY_COOKIE = "currency";
 /** The browser's time zone, set by the client so the server can guess the country locally. */
 export const TIMEZONE_COOKIE = "geo_tz";
 
+/**
+ * Formats an amount with the formatter, dropping the closing dot that Arabic
+ * currency symbols carry ("ج.م." → "ج.م", "ر.س." → "ر.س").
+ */
+export function formatCurrencyParts(formatter: Intl.NumberFormat, amount: number): string {
+  return formatter
+    .formatToParts(amount)
+    .map((part) => (part.type === "currency" ? part.value.replace(/\.$/, "") : part.value))
+    .join("");
+}
+
 export function isCurrency(value: string | null | undefined): value is Currency {
   return CURRENCIES.includes(value as Currency);
 }

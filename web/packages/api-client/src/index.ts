@@ -1,3 +1,4 @@
+import { formatCurrencyParts } from "./currency";
 import type {
   Billing,
   BillingChange,
@@ -394,7 +395,5 @@ export function createClient({ baseUrl, token, tenant, student, locale, currency
 export type ApiClient = ReturnType<typeof createClient>;
 
 export function formatMoney(cents: number, currency = "USD", locale = "en") {
-  return new Intl.NumberFormat(locale, { style: "currency", currency, maximumFractionDigits: cents % 100 ? 2 : 0 }).format(
-    cents / 100,
-  );
+  return formatCurrencyParts(new Intl.NumberFormat(locale, { style: "currency", currency, maximumFractionDigits: cents % 100 ? 2 : 0 }), cents / 100);
 }
