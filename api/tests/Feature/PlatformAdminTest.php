@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Plan;
+use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Support\Totp;
@@ -39,6 +41,18 @@ class PlatformAdminTest extends TestCase
         $this->patchJson("/api/v1/platform/tenants/{$tenant->id}", ['status' => 'suspended'])->assertOk();
 
         $this->assertSame('suspended', $tenant->fresh()->status);
+    }
+
+    public function test_monthly_revenue_is_reported_in_the_base_currency(): void
+    {
+        $admin = User::factory()->create(['is_platform_admin' => true]);
+        $admin->forceFill(['mfa_secret' => Totp::generateSecret(), 'mfa_enabled_at' => now()])->save();
+        Sanctum::actingAs($admin);
+        $plan = Plan::factory()->create(['price_monthly_cents' => 37500, 'currency' => 'SAR']);
+        Subscription::create(['tenant_id' => Tenant::factory()->create()->id, 'plan_id' => $plan->id, 'status' => 'active', 'interval' => 'monthly']);
+
+        // 375 SAR at the fallback rate of 3.75 per USD.
+        $this->getJson('/api/v1/platform/stats')->assertOk()->assertJsonPath('mrr_cents', 10000);
     }
 
     public function test_public_site_endpoint(): void

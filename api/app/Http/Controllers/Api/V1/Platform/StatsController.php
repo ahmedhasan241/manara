@@ -8,6 +8,7 @@ use App\Models\Membership;
 use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\Currencies;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -16,16 +17,19 @@ use Illuminate\Support\Facades\DB;
  */
 class StatsController extends Controller
 {
-    public function __invoke(): JsonResponse
+    public function __invoke(Currencies $currencies): JsonResponse
     {
         $current = Subscription::query()
             ->whereIn('id', Subscription::selectRaw('max(id)')->groupBy('tenant_id'))
-            ->with('plan:id,price_monthly_cents,price_yearly_cents')
+            ->with('plan:id,price_monthly_cents,price_yearly_cents,currency')
             ->get();
 
-        $mrrCents = $current->where('status', 'active')->sum(fn (Subscription $s) => $s->interval === 'yearly'
-            ? intdiv($s->plan->price_yearly_cents, 12)
-            : $s->plan->price_monthly_cents);
+        // Plans may be priced in different currencies; revenue is reported in the base currency.
+        $mrrCents = $current->where('status', 'active')->sum(fn (Subscription $s) => $currencies->convert(
+            $s->interval === 'yearly' ? intdiv($s->plan->price_yearly_cents, 12) : $s->plan->price_monthly_cents,
+            $s->plan->currency,
+            $currencies->base(),
+        ));
 
         $signups = Tenant::query()
             ->where('created_at', '>=', now()->subDays(30)->startOfDay())

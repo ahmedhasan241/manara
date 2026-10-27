@@ -94,7 +94,7 @@ export function PlanForm({ plan }: { plan?: Plan }) {
             <Input id="plan-py" name="price_yearly" type="number" step="0.01" min="0" defaultValue={plan ? plan.price_yearly_cents / 100 : ""} />
           </Field>
           <Field label={t("Currency")} htmlFor="plan-cur">
-            <Input id="plan-cur" name="currency" maxLength={3} defaultValue={plan?.currency ?? "USD"} />
+            <Input id="plan-cur" name="currency" maxLength={3} defaultValue={plan?.currency ?? "SAR"} />
           </Field>
         </FormSection>
 
