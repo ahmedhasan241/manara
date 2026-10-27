@@ -2298,6 +2298,13 @@ const fr: Record<MessageKey, Translation> = {
   "Staff included": "Personnel inclus",
   "Storage included (GB)": "Stockage inclus (Go)",
   "{students} students · {staff} staff": "{students} élèves · {staff} membres du personnel",
+  "Sell your courses online: Manara keeps {percent}% of each sale": "Vendez vos cours en ligne : Manara garde {percent} % de chaque vente",
+  "Course sales commission": "Commission sur les ventes de cours",
+  "Course sales commission (%)": "Commission sur les ventes de cours (%)",
+  "Default rate": "Taux par défaut",
+  "Share of each course sale Manara keeps. Empty = default rate.": "Part de chaque vente de cours conservée par Manara. Vide = taux par défaut.",
+  "platform revenue (on average {percent}% of sales)": "revenus de la plateforme (en moyenne {percent} % des ventes)",
+  "Learners in other countries see the price in their own currency.": "Les apprenants d’autres pays voient le prix dans leur propre devise.",
 };
 
 export default fr;

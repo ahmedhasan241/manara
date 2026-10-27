@@ -61,7 +61,7 @@ class CourseSalesCommissionTest extends TestCase
         $this->assertSame('EGP', $this->course($this->seller('EG'), 49900, 'cairo')->currency);
         $this->assertSame('BRL', $this->course($this->seller('BR'), 9900, 'rio')->currency);
         // Countries without a supported currency price in the base currency.
-        $this->assertSame('USD', $this->course($this->seller('KE'), 2900, 'nairobi')->currency);
+        $this->assertSame('USD', $this->course($this->seller('NZ'), 2900, 'auckland')->currency);
     }
 
     public function test_commission_follows_the_sellers_package_and_country(): void

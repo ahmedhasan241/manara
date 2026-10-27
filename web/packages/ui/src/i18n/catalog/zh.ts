@@ -2298,6 +2298,13 @@ const zh: Record<MessageKey, Translation> = {
   "Staff included": "包含教职员工数",
   "Storage included (GB)": "包含存储空间（GB）",
   "{students} students · {staff} staff": "{students} 名学生 · {staff} 名教职员工",
+  "Sell your courses online: Manara keeps {percent}% of each sale": "在线销售课程：Manara 收取每笔销售的 {percent}%",
+  "Course sales commission": "课程销售佣金",
+  "Course sales commission (%)": "课程销售佣金（%）",
+  "Default rate": "默认比例",
+  "Share of each course sale Manara keeps. Empty = default rate.": "Manara 从每笔课程销售中收取的比例。留空 = 默认比例。",
+  "platform revenue (on average {percent}% of sales)": "平台收入（平均占销售额的 {percent}%）",
+  "Learners in other countries see the price in their own currency.": "其他国家/地区的学员会看到以其本地货币显示的价格。",
 };
 
 export default zh;

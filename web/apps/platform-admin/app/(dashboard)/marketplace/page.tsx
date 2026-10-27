@@ -28,7 +28,7 @@ export default async function MarketplacePage() {
         meta={
           <>
             <span className="font-display text-lg font-bold">{fmt.money(report.platform_revenue_cents)}</span>
-            <span className="text-ink-muted">{t("platform revenue ({percent}% of sales)", { percent: report.platform_fee_percent })}</span>
+            <span className="text-ink-muted">{t("platform revenue (on average {percent}% of sales)", { percent: report.platform_fee_percent })}</span>
           </>
         }
         actions={

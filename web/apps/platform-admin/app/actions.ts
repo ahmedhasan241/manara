@@ -119,6 +119,7 @@ export async function savePlan(id: number | null, _prev: ActionResult | null, fo
   const optionalCents = (value: unknown) => (value === "" || value === null || value === undefined ? null : cents(value));
   const wholeOk = (value: unknown) => value === "" || value === null || value === undefined || (Number.isInteger(Number(value)) && Number(value) >= 1);
   const whole = (value: unknown) => (value === "" || value === null || value === undefined ? null : Number(value));
+  const percentOk = (value: unknown) => value === "" || value === null || value === undefined || (Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) <= 100);
   const amountOk = (value: unknown) => value === "" || value === null || value === undefined || (Number.isFinite(Number(value)) && Number(value) >= 0);
 
   // Country prices arrive as one JSON field of rows in major units; rows left entirely empty are dropped.
@@ -144,7 +145,7 @@ export async function savePlan(id: number | null, _prev: ActionResult | null, fo
       if (seen.has(country)) return { ok: false, error: t("{country} is listed more than once.", { country }) };
       seen.add(country);
       const amounts = [row.monthly, row.yearly, row.extra_student, row.extra_staff, row.video];
-      if (row.monthly === "" || row.yearly === "" || !amounts.every(amountOk) || ![row.students, row.staff, row.storage].every(wholeOk)) {
+      if (row.monthly === "" || row.yearly === "" || !amounts.every(amountOk) || ![row.students, row.staff, row.storage].every(wholeOk) || !percentOk(row.commission)) {
         return { ok: false, error: t("Check the prices for {country}.", { country }) };
       }
       prices.push({
@@ -155,6 +156,7 @@ export async function savePlan(id: number | null, _prev: ActionResult | null, fo
         extra_student_cents: cents(row.extra_student || 0),
         extra_staff_cents: cents(row.extra_staff || 0),
         video_addon_cents: optionalCents(row.video),
+        commission_percent: whole(row.commission),
         max_students: whole(row.students),
         max_staff: whole(row.staff),
         storage_gb: whole(row.storage),
@@ -167,6 +169,7 @@ export async function savePlan(id: number | null, _prev: ActionResult | null, fo
     extra_student_cents: cents(form.get("extra_student") || 0),
     extra_staff_cents: cents(form.get("extra_staff") || 0),
     video_addon_cents: optionalCents(form.get("video_addon")),
+    commission_percent: form.get("commission") === "" || form.get("commission") === null ? null : Number(form.get("commission")),
     translations,
     code: String(form.get("code")),
     name: String(form.get("name")),

@@ -1,5 +1,5 @@
 import { ArrowDown, ArrowUp, Check, Eye, EyeOff, ExternalLink, FileText, Globe2, PlayCircle, Plus, Rocket, Trash2, Users } from "lucide-react";
-import type { CourseMarketplaceSettings, CurriculumSection } from "@educloud/api-client";
+import { CURRENCIES, type CourseMarketplaceSettings, type CurriculumSection } from "@educloud/api-client";
 import { Badge, Card, Field, Input, Select, Textarea, asKey, buttonClass, cn } from "@educloud/ui";
 import { ToastButton } from "@educloud/portal-kit/toast-button";
 import { ToastForm } from "@educloud/portal-kit/toast-form";
@@ -95,8 +95,17 @@ export async function CourseBuilder({ courseId, settings, curriculum, students }
               <Input id="subtitle" name="subtitle" defaultValue={settings.subtitle ?? ""} maxLength={255} placeholder={t("One line that sells the course")} />
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label={t("Price (USD)")} htmlFor="price" hint={t("0 makes it free.")}>
+              <Field label={t("Price")} htmlFor="price" hint={t("0 makes it free.")}>
                 <Input id="price" name="price" type="number" min="0" step="0.01" defaultValue={(settings.price_cents / 100).toFixed(2)} />
+              </Field>
+              <Field label={t("Currency")} htmlFor="currency" hint={t("Learners in other countries see the price in their own currency.")}>
+                <Select id="currency" name="currency" defaultValue={settings.currency}>
+                  {CURRENCIES.map((code) => (
+                    <option key={code} value={code}>
+                      {code}
+                    </option>
+                  ))}
+                </Select>
               </Field>
               <Field label={t("Category")} htmlFor="category">
                 <Input id="category" name="category" defaultValue={settings.category ?? ""} placeholder={t("Science")} />

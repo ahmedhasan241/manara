@@ -27,6 +27,7 @@ export async function saveMarketplace(courseId: string, _state: ActionState, for
         level: String(form.get("level") ?? "all") as "all",
         language: String(form.get("language") ?? "en"),
         price_cents: Math.round(Number(form.get("price") || 0) * 100),
+        ...(form.get("currency") ? { currency: String(form.get("currency")) } : {}),
         outcomes: lines(form.get("outcomes")),
         requirements: lines(form.get("requirements")),
       }),

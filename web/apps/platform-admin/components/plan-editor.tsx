@@ -35,6 +35,7 @@ export function PlanCard({ plan }: { plan: Plan & { subscriptions_count?: number
           [t("Extra student seat"), t("{price}/mo", { price: fmt.exactMoney(plan.extra_student_cents ?? 0, plan.currency) })],
           [t("Extra staff seat"), t("{price}/mo", { price: fmt.exactMoney(plan.extra_staff_cents ?? 0, plan.currency) })],
           [t("Video meetings"), plan.video_addon_cents == null ? t("Included") : t("{price}/mo", { price: fmt.exactMoney(plan.video_addon_cents, plan.currency) })],
+          [t("Course sales commission"), plan.commission_percent == null ? t("Default rate") : `${plan.commission_percent}%`],
         ].map(([k, v]) => (
           <div key={k} className="flex justify-between">
             <dt className="text-ink-muted">{k}</dt>
@@ -127,6 +128,9 @@ export function PlanForm({ plan }: { plan?: Plan }) {
           <Field label={t("Video meetings add-on")} htmlFor="plan-video" hint={t("Empty = included")}>
             <Input id="plan-video" name="video_addon" type="number" step="0.01" min="0" defaultValue={plan?.video_addon_cents != null ? plan.video_addon_cents / 100 : ""} />
           </Field>
+          <Field label={t("Course sales commission (%)")} htmlFor="plan-commission" hint={t("Share of each course sale Manara keeps. Empty = default rate.")}>
+            <Input id="plan-commission" name="commission" type="number" step="1" min="0" max="100" defaultValue={plan?.commission_percent ?? ""} />
+          </Field>
         </FormSection>
 
         <FormSection title={t("Prices by country")} description={t("Visitors from these countries see their own price instead of the default one. Amounts are in the country's currency.")}>
@@ -201,6 +205,8 @@ interface PriceRow {
   extra_student: string;
   extra_staff: string;
   video: string;
+  /** Course sales commission in percent; empty uses the plan's own. */
+  commission: string;
   /** What the plan includes in this country; empty uses the plan's own. */
   students: string;
   staff: string;
@@ -208,7 +214,7 @@ interface PriceRow {
 }
 
 type AmountField = "monthly" | "yearly" | "extra_student" | "extra_staff" | "video";
-type CapacityField = "students" | "staff" | "storage";
+type CapacityField = "students" | "staff" | "storage" | "commission";
 
 const major = (cents: number | null | undefined) => (cents == null ? "" : String(cents / 100));
 
@@ -229,6 +235,7 @@ function CountryPrices({ initial }: { initial: PlanPrice[] }) {
       extra_student: major(p.extra_student_cents),
       extra_staff: major(p.extra_staff_cents),
       video: major(p.video_addon_cents),
+      commission: p.commission_percent == null ? "" : String(p.commission_percent),
       students: p.max_students == null ? "" : String(p.max_students),
       staff: p.max_staff == null ? "" : String(p.max_staff),
       storage: p.storage_gb == null ? "" : String(p.storage_gb),
@@ -237,7 +244,7 @@ function CountryPrices({ initial }: { initial: PlanPrice[] }) {
   const [nextKey, setNextKey] = useState(initial.length);
   const update = (key: number, field: Exclude<keyof PriceRow, "key">, value: string) => setRows((all) => all.map((r) => (r.key === key ? { ...r, [field]: value } : r)));
   const add = () => {
-    setRows((all) => [...all, { key: nextKey, country: "", currency: "", monthly: "", yearly: "", extra_student: "", extra_staff: "", video: "", students: "", staff: "", storage: "" }]);
+    setRows((all) => [...all, { key: nextKey, country: "", currency: "", monthly: "", yearly: "", extra_student: "", extra_staff: "", video: "", commission: "", students: "", staff: "", storage: "" }]);
     setNextKey((k) => k + 1);
   };
 
@@ -299,6 +306,7 @@ function CountryPrices({ initial }: { initial: PlanPrice[] }) {
             {amount(row, "extra_student", t("Extra student seat"))}
             {amount(row, "extra_staff", t("Extra staff seat"))}
             {amount(row, "video", t("Video meetings add-on"), false, t("Empty = included"))}
+            {capacity(row, "commission", t("Course sales commission (%)"))}
             {capacity(row, "students", t("Students included"))}
             {capacity(row, "staff", t("Staff included"))}
             {capacity(row, "storage", t("Storage included (GB)"))}

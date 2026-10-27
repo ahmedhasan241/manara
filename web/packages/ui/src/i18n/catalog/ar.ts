@@ -2300,6 +2300,13 @@ const ar = {
   "Staff included": "الموظفون المشمولون",
   "Storage included (GB)": "التخزين المشمول (غيغابايت)",
   "{students} students · {staff} staff": "{students} طالب · {staff} موظف",
+  "Sell your courses online: Manara keeps {percent}% of each sale": "بِع دوراتك عبر الإنترنت: تحتفظ منارة بنسبة {percent}% من كل عملية بيع",
+  "Course sales commission": "عمولة بيع الدورات",
+  "Course sales commission (%)": "عمولة بيع الدورات (%)",
+  "Default rate": "النسبة الافتراضية",
+  "Share of each course sale Manara keeps. Empty = default rate.": "النسبة التي تحتفظ بها منارة من كل عملية بيع دورة. فارغ = النسبة الافتراضية.",
+  "platform revenue (on average {percent}% of sales)": "إيرادات المنصة (بمتوسط {percent}% من المبيعات)",
+  "Learners in other countries see the price in their own currency.": "يرى المتعلمون في الدول الأخرى السعر بعملتهم.",
 } satisfies Record<string, Translation>;
 
 export default ar;

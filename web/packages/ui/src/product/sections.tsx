@@ -15,6 +15,7 @@ import {
   MessageCircle,
   ShieldCheck,
   Smartphone,
+  Store,
   Video,
   type LucideIcon,
 } from "lucide-react";
@@ -268,6 +269,12 @@ function PlanExtras({ plan, yearly, featured }: { plan: Plan; yearly: boolean; f
           </span>
         )}
       </p>
+      {plan.commission_percent != null && (
+        <p className={cn("flex items-start gap-2.5 text-xs", muted)}>
+          <Store className={cn("h-4 w-4 shrink-0", featured ? "text-accent-400" : "text-brand-500")} />
+          {t("Sell your courses online: Manara keeps {percent}% of each sale", { percent: plan.commission_percent })}
+        </p>
+      )}
       {seats.length > 0 && (
         <ul className={cn("space-y-0.5 ps-6.5 text-xs", muted)}>
           {seats.map((s) => (

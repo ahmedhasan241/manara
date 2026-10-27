@@ -61,6 +61,8 @@ export interface Plan {
   extra_staff_cents: number;
   /** Monthly price of the video meetings add-on; null when video meetings are included. */
   video_addon_cents: number | null;
+  /** Share of course sales Manara keeps from sellers on this plan (public plans: for the visitor's country). */
+  commission_percent: number | null;
   currency: string;
   /** Public plans: the country whose own price this is (null: the default price). */
   price_country?: string | null;
@@ -83,6 +85,8 @@ export interface PlanPrice {
   extra_student_cents: number;
   extra_staff_cents: number;
   video_addon_cents: number | null;
+  /** Course sales commission in this country (null: the plan's own). */
+  commission_percent?: number | null;
   /** What the plan includes in this country (null: the plan's own allowance). */
   max_students?: number | null;
   max_staff?: number | null;
