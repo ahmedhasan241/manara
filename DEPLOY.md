@@ -1,5 +1,15 @@
 # Deploying Manara
 
+> **Live now: everything on Vercel.** The API runs as the `manara-api` Vercel project
+> (Root Directory `api`, PHP via `vercel-php`, see `api/vercel.json`) at
+> `https://manara-api.vercel.app`, with a free Neon Postgres (`manara-db`) connected to it.
+> The five web apps use `API_URL=https://manara-api.vercel.app`.
+> Redeploy the API with `vercel deploy --prod` from a copy of the repo's `api/` folder.
+> Migrate or seed from your machine (in `api/`, after `vercel link --project manara-api`):
+> `vercel env run -e production -- php artisan migrate --force`.
+> Not available on Vercel: WebSockets (live updates), the queue worker (jobs run inline),
+> the scheduler, and persistent uploads. The Render setup below still works for all of those.
+
 - **API** (Laravel + WebSockets + queue + scheduler) → **Render**, one Docker service built
   from `api/Dockerfile`, with a Postgres database. Both are defined in `render.yaml`.
 - **Five web apps** (Next.js) → **Vercel**, one project each.
