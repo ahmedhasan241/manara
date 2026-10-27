@@ -101,6 +101,11 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            // Neon needs the endpoint ID from clients whose libpq lacks SNI (the Vercel PHP
+            // runtime); App\Support\Database\NeonPostgresConnector sends it.
+            'neon_endpoint' => Str::endsWith($neonHost = (string) parse_url((string) env('DB_URL', env('DATABASE_URL_UNPOOLED', env('DATABASE_URL'))), PHP_URL_HOST), '.neon.tech')
+                ? Str::before(Str::before($neonHost, '.'), '-pooler')
+                : null,
         ],
 
         'sqlsrv' => [

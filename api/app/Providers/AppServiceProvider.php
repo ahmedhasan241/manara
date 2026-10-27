@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Enums\Role;
 use App\Models\User;
 use App\Notifications\SystemAlert;
+use App\Support\Database\NeonPostgresConnector;
 use App\Support\Tenancy\CurrentTenant;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -25,6 +26,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->scoped(CurrentTenant::class);
+
+        $this->app->bind('db.connector.pgsql', NeonPostgresConnector::class);
     }
 
     /**
