@@ -11,7 +11,8 @@ import { getT } from "@educloud/ui/locale";
  */
 
 export type Success<T = undefined> = { ok: true; message?: string; data?: T };
-export type Failure = { ok: false; error: string; errors?: Record<string, string[]> };
+/** `code` is the API's reason when it gives one (e.g. "seat_limit", "addon_required"). */
+export type Failure = { ok: false; error: string; errors?: Record<string, string[]>; code?: string };
 export type Result<T = undefined> = Success<T> | Failure;
 
 /**
@@ -27,7 +28,7 @@ export async function failure(error: unknown, fallback?: string): Promise<Failur
       redirect("/login?expired=1");
     }
     const first = Object.values(error.errors ?? {})[0]?.[0];
-    return { ok: false, error: first || error.message || fallback || (await getT())("Something went wrong. Please try again."), errors: error.errors };
+    return { ok: false, error: first || error.message || fallback || (await getT())("Something went wrong. Please try again."), errors: error.errors, ...(error.code ? { code: error.code } : {}) };
   }
   return { ok: false, error: fallback ?? (await getT())("We couldn't reach the server. Please try again.") };
 }

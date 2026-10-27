@@ -1,7 +1,7 @@
 import { BarChart3, CalendarCheck, GraduationCap, HeartHandshake, Video } from "lucide-react";
 import { ArchPhoto } from "@educloud/ui";
 import { Reveal } from "@educloud/ui/product";
-import { signupMetadata } from "@educloud/ui/product/server";
+import { loadContent, signupMetadata } from "@educloud/ui/product/server";
 import { getT } from "@educloud/ui/locale";
 import { LighthouseBeams } from "@/components/brand-art";
 import { SignupForm } from "@/components/signup-form";
@@ -9,9 +9,13 @@ import { SignupForm } from "@/components/signup-form";
 export const generateMetadata = signupMetadata;
 
 /** Workspace sign-up on the navy lighthouse band, beside what's included. */
-export default async function SignupPage({ searchParams }: { searchParams: Promise<{ plan?: string; type?: string }> }) {
-  const { plan, type } = await searchParams;
-  const t = await getT();
+export default async function SignupPage({ searchParams }: { searchParams: Promise<{ plan?: string; type?: string; interval?: string }> }) {
+  const { plan, type, interval } = await searchParams;
+  const [t, { plans }] = await Promise.all([getT(), loadContent()]);
+  // The video meetings add-on price of the chosen package (or the first one), priced for the visitor's country.
+  const chosen = plans.find((p) => p.code === plan) ?? plans[0];
+  const videoAddon = chosen ? { cents: chosen.video_addon_cents, currency: chosen.currency } : null;
+  const billing = interval === "yearly" || interval === "monthly" ? interval : undefined;
 
   return (
     <section className="banner-brand relative isolate overflow-hidden">
@@ -44,7 +48,7 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
             <h1 className="font-display text-3xl font-bold tracking-tight !text-white">{t("Start your free trial")}</h1>
             <p className="mt-2 text-nav-muted">{t("14 days free. No credit card needed.")}</p>
           </div>
-          <SignupForm plan={plan} type={type} />
+          <SignupForm plan={plan} type={type} interval={billing} videoAddon={videoAddon} />
         </div>
       </div>
     </section>

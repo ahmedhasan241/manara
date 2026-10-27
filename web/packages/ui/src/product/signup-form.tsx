@@ -1,8 +1,10 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { Video } from "lucide-react";
 import { Alert, Button, Card, Field, Input, Select, buttonClass } from "../components";
-import { useT } from "../i18n-provider";
+import { Checkbox } from "../primitives";
+import { useFormat, useT } from "../i18n-provider";
 import { signup, type SignupState } from "./signup-action";
 
 const slugify = (value: string) =>
@@ -13,7 +15,44 @@ const slugify = (value: string) =>
     .replace(/^-+|-+$/g, "")
     .slice(0, 40);
 
-export function SignupForm({ plan, type }: { plan?: string; type?: string }) {
+/** The video meetings add-on price for the chosen plan (null cents: included, so there is nothing to choose). */
+export interface VideoAddonPrice {
+  cents: number | null;
+  currency: string;
+}
+
+/**
+ * "Add video meetings": a checkbox posted as `video_addon`, with the add-on
+ * price for the chosen plan and billing interval when known. Hidden when the
+ * plan already includes video meetings.
+ */
+export function VideoAddonOption({ price, interval, defaultChecked }: { price?: VideoAddonPrice | null; interval?: "monthly" | "yearly"; defaultChecked?: boolean }) {
+  const t = useT();
+  const fmt = useFormat();
+  if (price && price.cents == null) return null;
+  const yearly = interval === "yearly";
+  const amount = price?.cents != null ? fmt.money(yearly ? price.cents * 10 : price.cents, price.currency) : null;
+  return (
+    <label htmlFor="video_addon" className="flex cursor-pointer items-start gap-3 rounded-2xl border border-line bg-surface-2 p-4 text-sm">
+      <Checkbox id="video_addon" name="video_addon" value="1" defaultChecked={defaultChecked} className="mt-0.5" />
+      <span className="flex-1">
+        <span className="flex items-center gap-2 font-semibold">
+          <Video className="h-4 w-4 text-brand-500" aria-hidden />
+          {t("Add video meetings")}
+        </span>
+        <span className="mt-0.5 block text-xs text-ink-muted">
+          {amount == null
+            ? t("Live lessons over Zoom or Jitsi. Free during the trial.")
+            : yearly
+              ? t("Live lessons over Zoom or Jitsi. Free during the trial, then {price} / year.", { price: amount })
+              : t("Live lessons over Zoom or Jitsi. Free during the trial, then {price} / month.", { price: amount })}
+        </span>
+      </span>
+    </label>
+  );
+}
+
+export function SignupForm({ plan, type, interval, videoAddon }: { plan?: string; type?: string; interval?: "monthly" | "yearly"; videoAddon?: VideoAddonPrice | null }) {
   const t = useT();
   const [state, action, pending] = useActionState<SignupState, FormData>(signup, {});
   const [slug, setSlug] = useState("");
@@ -38,6 +77,7 @@ export function SignupForm({ plan, type }: { plan?: string; type?: string }) {
     <Card className="p-6 sm:p-8">
       <form action={action} className="space-y-4" noValidate>
         {plan && <input type="hidden" name="plan" value={plan} />}
+        {interval && <input type="hidden" name="interval" value={interval} />}
         {state.message && <Alert>{state.message}</Alert>}
 
         <Field label={t("Your name")} htmlFor="name" error={e.name}>
@@ -76,6 +116,8 @@ export function SignupForm({ plan, type }: { plan?: string; type?: string }) {
             }}
           />
         </Field>
+
+        <VideoAddonOption price={videoAddon} interval={interval} />
 
         <Button type="submit" size="lg" className="w-full" disabled={pending}>
           {pending ? t("Creating your workspace…") : t("Create workspace")}

@@ -3,6 +3,7 @@ import { CreditCard } from "lucide-react";
 import { serverClient } from "@educloud/api-client/server";
 import { Badge, Card, EmptyState, FilterChips, PageHeader, Pagination } from "@educloud/ui";
 import { SubscriptionActions } from "@/components/subscription-actions";
+import { subscriptionPrice, subscriptionSeats } from "@/lib/subscription-price";
 import { getFormat, getT } from "@educloud/ui/locale";
 
 export async function generateMetadata() {
@@ -64,6 +65,7 @@ export default async function SubscriptionsPage({ searchParams }: { searchParams
             <tbody>
               {subs.data.map((s) => {
                 const date = s.status === "trialing" ? s.trial_ends_at : s.current_period_ends_at;
+                const seats = subscriptionSeats(s, t);
                 return (
                   <tr key={s.id} className="border-b border-line last:border-0 hover:bg-surface-2/60">
                     <td className="px-5 py-3">
@@ -73,10 +75,12 @@ export default async function SubscriptionsPage({ searchParams }: { searchParams
                       <span className="block text-xs capitalize text-ink-muted">{s.tenant.type === "teacher" ? "teacher / lecturer" : s.tenant.type}</span>
                     </td>
                     <td className="px-5 py-3">
-                      {s.plan.name}
-                      <span className="block text-xs text-ink-muted">
-                        {s.interval === "yearly" ? `${fmt.money(s.plan.price_yearly_cents, s.plan.currency)}/yr` : `${fmt.money(s.plan.price_monthly_cents, s.plan.currency)}/mo`}
+                      <span className="flex items-center gap-2">
+                        {s.plan.name}
+                        {s.video_addon && <Badge tone="brand">{t("Video")}</Badge>}
                       </span>
+                      <span className="block text-xs tabular-nums text-ink-muted">{subscriptionPrice(s, fmt, t)}</span>
+                      {seats && <span className="block text-xs text-ink-muted">{seats}</span>}
                     </td>
                     <td className="px-5 py-3">
                       <Badge tone={tone[s.status]}>{s.status.replace("_", " ")}</Badge>

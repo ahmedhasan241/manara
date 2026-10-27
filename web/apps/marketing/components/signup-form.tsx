@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
 import { Button, Card, Field, Input, LocationFields, Select, buttonClass, useStateToast, useT } from "@educloud/ui";
+import { VideoAddonOption, type VideoAddonPrice } from "@educloud/ui/product";
 import { signup, type SignupState } from "@/app/signup/actions";
 
 const slugify = (value: string) =>
@@ -15,8 +16,8 @@ const slugify = (value: string) =>
 
 const TYPES = ["teacher", "school", "university"];
 
-/** Workspace sign-up: who you are, where you are, and your workspace's name and web address. */
-export function SignupForm({ plan, type }: { plan?: string; type?: string }) {
+/** Workspace sign-up: who you are, where you are, your workspace's name and web address, and the video meetings add-on. */
+export function SignupForm({ plan, type, interval, videoAddon }: { plan?: string; type?: string; interval?: "monthly" | "yearly"; videoAddon?: VideoAddonPrice | null }) {
   const t = useT();
   const [state, action, pending] = useActionState<SignupState, FormData>(signup, {});
   const [slug, setSlug] = useState("");
@@ -50,6 +51,7 @@ export function SignupForm({ plan, type }: { plan?: string; type?: string }) {
       {/* Re-mounted after each attempt so the fields show what was typed (React resets forms after an action). */}
       <form key={state.attempt ?? 0} action={action} className="space-y-4" noValidate aria-busy={pending || undefined}>
         {plan && <input type="hidden" name="plan" value={plan} />}
+        {interval && <input type="hidden" name="interval" value={interval} />}
 
         <Field label={t("Your name")} htmlFor="name" error={e.name}>
           <Input id="name" name="name" autoComplete="name" required defaultValue={v.name} aria-invalid={!!e.name || undefined} />
@@ -94,6 +96,8 @@ export function SignupForm({ plan, type }: { plan?: string; type?: string }) {
             }}
           />
         </Field>
+
+        <VideoAddonOption price={videoAddon} interval={interval} defaultChecked={v.video_addon} />
 
         <Button type="submit" size="lg" className="w-full" disabled={pending}>
           {pending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}

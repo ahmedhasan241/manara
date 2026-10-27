@@ -139,7 +139,7 @@ export default async function HomePage() {
       )}
 
       <section id="packages" className="mx-auto max-w-6xl px-4 py-24">
-        <SectionTitle eyebrow={t("Packages")} title={t("Simple, honest pricing")} subtitle={t("Every package includes the student & family portal, mobile apps and live lessons.")} />
+        <SectionTitle eyebrow={t("Packages")} title={t("Simple, honest pricing")} subtitle={t("Every package includes the student & family portal and mobile apps. Live lessons are an add-on on every package, free during the trial.")} />
         <Packages plans={content.plans} />
         <p className="mt-8 text-center text-sm text-ink-muted">
           {t("Need something bigger?")}{" "}<Link href="mailto:sales@manara.app" className="font-semibold text-brand-600 underline dark:text-brand-300">{t("Talk to us")}</Link>

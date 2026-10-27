@@ -5,7 +5,7 @@ import { ArchPhoto, Swoosh } from "../imagery";
 import { asKey } from "../translate";
 import { getFormat, getT } from "../locale-server";
 import { loadContent } from "./content";
-import { Audiences, Faq, Features, Packages, Reveal, Testimonials } from "./sections";
+import { Audiences, Faq, Features, Packages, PriceCalculator, Reveal, Testimonials } from "./sections";
 import { SignupForm } from "./signup-form";
 
 /*
@@ -44,7 +44,16 @@ export async function PricingView() {
     { label: t("Staff accounts"), value: (p) => (p.max_staff ? fmt.number(p.max_staff) : t("Unlimited")) },
     { label: t("Storage for materials & recordings"), value: (p) => `${p.storage_gb} GB` },
     { label: t("Student & family portal"), value: () => true },
-    { label: t("Live lessons (Zoom or Jitsi)"), value: () => true },
+    {
+      label: t("Live lessons (Zoom or Jitsi)"),
+      value: (p) => (p.video_addon_cents == null ? true : t("Add-on · {price} / month", { price: fmt.money(p.video_addon_cents, p.currency) })),
+    },
+    ...(plans.some((p) => p.max_students != null && p.extra_student_cents > 0)
+      ? [{ label: t("Extra student seat"), value: (p: (typeof plans)[number]) => (p.max_students == null ? t("Unlimited") : t("{price} / month", { price: fmt.money(p.extra_student_cents, p.currency) })) }]
+      : []),
+    ...(plans.some((p) => p.max_staff != null && p.extra_staff_cents > 0)
+      ? [{ label: t("Extra staff seat"), value: (p: (typeof plans)[number]) => (p.max_staff == null ? t("Unlimited") : t("{price} / month", { price: fmt.money(p.extra_staff_cents, p.currency) })) }]
+      : []),
     { label: t("Encrypted messaging"), value: () => true },
     ...[...new Set(plans.flatMap((p) => p.features ?? []))]
       // "Everything in School" lines describe tiers, not features.
@@ -60,6 +69,13 @@ export async function PricingView() {
           <Packages plans={plans} />
         </div>
       </section>
+
+      {plans.length > 0 && (
+        <section id="calculator" className="mx-auto max-w-6xl scroll-mt-24 px-4 pt-20">
+          <Heading eyebrow={t("Estimate your price")} title={t("What would you pay?")} subtitle={t("Enter your number of students and staff. Extra seats and video meetings are added to the package price.")} />
+          <PriceCalculator plans={plans} />
+        </section>
+      )}
 
       {plans.length > 0 && (
         <section className="mx-auto max-w-6xl px-4 py-20">
@@ -118,8 +134,12 @@ export async function signupMetadata() {
 }
 
 /** Workspace sign-up for teachers, schools and universities, beside a photo and what's included. */
-export async function SignupView({ plan, type }: { plan?: string; type?: string }) {
+export async function SignupView({ plan, type, interval }: { plan?: string; type?: string; interval?: string }) {
   const t = await getT();
+  const { plans } = await loadContent();
+  const chosen = plans.find((p) => p.code === plan) ?? plans[0];
+  const videoAddon = chosen ? { cents: chosen.video_addon_cents, currency: chosen.currency } : null;
+  const billing = interval === "yearly" || interval === "monthly" ? interval : undefined;
   return (
     <section className="band-peach">
       <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 lg:grid-cols-[1fr_28rem] lg:py-20">
@@ -148,7 +168,7 @@ export async function SignupView({ plan, type }: { plan?: string; type?: string 
             <h1 className="font-display text-3xl font-bold tracking-tight">{t("Start your free trial")}</h1>
             <p className="mt-2 text-ink-muted">{t("14 days free. No credit card needed.")}</p>
           </div>
-          <SignupForm plan={plan} type={type} />
+          <SignupForm plan={plan} type={type} interval={billing} videoAddon={videoAddon} />
         </div>
       </div>
     </section>

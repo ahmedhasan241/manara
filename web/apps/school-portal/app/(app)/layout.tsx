@@ -63,7 +63,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         { href: "/reviews", label: t("Reviews"), icon: "reviews" },
       ],
     },
-    ...(can("members.manage") ? [{ label: t("Workspace"), items: [{ href: "/people", label: t("People"), icon: "people" as const }] }] : []),
+    {
+      label: t("Workspace"),
+      items: [
+        ...(can("members.manage") ? [{ href: "/people", label: t("People"), icon: "people" as const }] : []),
+        ...(can("tenant.manage") ? [{ href: "/billing", label: t("Package & billing"), icon: "package" as const }] : []),
+      ],
+    },
   ];
   const nav = groups.filter((g) => g.items.length > 0);
 
@@ -77,6 +83,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     ...(can("announcements.write") ? [{ id: "announce", label: t("Post an announcement"), href: "/announcements/new", group: "actions" as const }] : []),
     { id: "message", label: t("Send a message"), href: "/messages", group: "actions" },
     ...(canTeach ? [{ id: "teaching", label: t("My teaching"), href: "/teaching", group: "actions" as const, keywords: "today plan homework marking at risk" }] : []),
+    ...(can("tenant.manage") ? [{ id: "billing", label: t("Package & billing"), href: "/billing", group: "actions" as const, keywords: "plan seats subscription video meetings price upgrade invoice" }] : []),
     ...(can("members.manage") ? [{ id: "person", label: t("Add person"), href: "/people/new", group: "actions" as const, keywords: "student teacher parent invite" }] : []),
     ...(can("members.manage") ? [{ id: "classes", label: university ? t("Add a year or section") : t("Add a level or class"), href: "/classes/new", group: "actions" as const, keywords: "grade level class section year structure" }] : []),
     ...(canResults

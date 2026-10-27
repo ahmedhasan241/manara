@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useTransition, type FormEvent, type ReactNode } from "react";
+import { useRef, useState, useTransition, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useActionToast, type ActionResult } from "@educloud/ui";
+import { UpgradeNotice, upgradeCode } from "./upgrade-notice";
 
 /**
  * A form (usable from server pages) bound to a server action that returns an
@@ -35,12 +36,15 @@ export function ToastForm({
   const router = useRouter();
   const [pending, start] = useTransition();
   const form = useRef<HTMLFormElement>(null);
+  // Out of seats or add-ons: the reason stays on screen with a link to the package.
+  const [upgrade, setUpgrade] = useState<string | null>(null);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     start(async () => {
       const result = await notify.run(() => action(data), { success, loading });
+      setUpgrade(result && result.ok === false && upgradeCode(result) ? result.error : null);
       if (!result || result.ok === false) return;
       if (resetOnSuccess) form.current?.reset();
       onSuccess?.();
@@ -53,6 +57,7 @@ export function ToastForm({
   return (
     <form ref={form} onSubmit={submit} className={className} aria-busy={pending || undefined}>
       <fieldset disabled={pending} className="contents">
+        {upgrade && <UpgradeNotice message={upgrade} className="mb-4" />}
         {children}
       </fieldset>
     </form>

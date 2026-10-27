@@ -14,7 +14,7 @@ export interface SignupState {
   /** Inline errors under each field. */
   errors?: Partial<Record<Field, string>>;
   /** What the person typed (except the password), so the form keeps it after a failed attempt. */
-  values?: Partial<Record<Exclude<Field, "password">, string>>;
+  values?: Partial<Record<Exclude<Field, "password">, string>> & { video_addon?: boolean };
   /** Bumped on every attempt; re-mounts the form with `values`. */
   attempt?: number;
   done?: { portalUrl: string; email: string };
@@ -35,7 +35,9 @@ export async function signup(prev: SignupState, form: FormData): Promise<SignupS
     country: text(form, "country").toUpperCase(),
     city: text(form, "city"),
     area: text(form, "area"),
+    video_addon: form.get("video_addon") === "1",
   };
+  const interval = text(form, "interval");
   const password = String(form.get("password") ?? "");
 
   // Country and city are required for every new workspace; check them before the round trip.
@@ -56,6 +58,8 @@ export async function signup(prev: SignupState, form: FormData): Promise<SignupS
       workspace_slug: values.workspace_slug,
       workspace_type: values.workspace_type,
       plan: text(form, "plan") || undefined,
+      interval: interval === "yearly" || interval === "monthly" ? interval : undefined,
+      video_addon: values.video_addon,
       country: values.country,
       city: values.city,
       area: values.area || undefined,

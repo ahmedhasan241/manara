@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import type { MarketingContent, Plan } from "@educloud/api-client";
+import type { MarketingContent, Plan, PlanInput, PlanPrice } from "@educloud/api-client";
 import { performLogin, type LoginStepState } from "@educloud/api-client/login-action";
 import { clearSession, serverClient } from "@educloud/api-client/server";
 import type { ActionResult } from "@educloud/ui";
@@ -50,6 +50,9 @@ export async function changePlan(tenantId: number, _prev: ActionResult | null, f
       plan_id: Number(form.get("plan_id")),
       status: String(form.get("status")),
       interval: String(form.get("interval") || "monthly"),
+      extra_students: Math.max(0, Math.floor(Number(form.get("extra_students") || 0))),
+      extra_staff: Math.max(0, Math.floor(Number(form.get("extra_staff") || 0))),
+      video_addon: form.get("video_addon") === "on",
       current_period_ends_at: String(form.get("current_period_ends_at") || "") || null,
     });
   } catch (error) {
@@ -112,7 +115,53 @@ export async function savePlan(id: number | null, _prev: ActionResult | null, fo
     const features = lines(`tr.${code}.features`);
     if (name || description || features.length) translations[code] = { name, description, features };
   }
-  const data: Partial<Plan> = {
+  const cents = (value: unknown) => Math.round(Number(value) * 100);
+  const optionalCents = (value: unknown) => (value === "" || value === null || value === undefined ? null : cents(value));
+  const amountOk = (value: unknown) => value === "" || value === null || value === undefined || (Number.isFinite(Number(value)) && Number(value) >= 0);
+
+  // Country prices arrive as one JSON field of rows in major units; rows left entirely empty are dropped.
+  let prices: PlanPrice[] | undefined;
+  const rawPrices = form.get("prices");
+  if (typeof rawPrices === "string") {
+    let rows: Record<string, string>[];
+    try {
+      rows = JSON.parse(rawPrices);
+      if (!Array.isArray(rows)) throw new Error();
+    } catch {
+      return { ok: false, error: t("Something went wrong. Please try again.") };
+    }
+    prices = [];
+    const seen = new Set<string>();
+    for (const row of rows) {
+      if (Object.values(row ?? {}).every((v) => String(v ?? "").trim() === "")) continue;
+      const country = String(row.country ?? "").trim().toUpperCase();
+      const currency = String(row.currency ?? "").trim().toUpperCase();
+      if (!/^[A-Z]{2}$/.test(country) || !/^[A-Z]{3}$/.test(currency)) {
+        return { ok: false, error: t("Each country price needs a 2-letter country code and a 3-letter currency.") };
+      }
+      if (seen.has(country)) return { ok: false, error: t("{country} is listed more than once.", { country }) };
+      seen.add(country);
+      const amounts = [row.monthly, row.yearly, row.extra_student, row.extra_staff, row.video];
+      if (row.monthly === "" || row.yearly === "" || !amounts.every(amountOk)) {
+        return { ok: false, error: t("Check the prices for {country}.", { country }) };
+      }
+      prices.push({
+        country,
+        currency,
+        price_monthly_cents: cents(row.monthly),
+        price_yearly_cents: cents(row.yearly),
+        extra_student_cents: cents(row.extra_student || 0),
+        extra_staff_cents: cents(row.extra_staff || 0),
+        video_addon_cents: optionalCents(row.video),
+      });
+    }
+  }
+
+  const data: PlanInput = {
+    ...(prices ? { prices } : {}),
+    extra_student_cents: cents(form.get("extra_student") || 0),
+    extra_staff_cents: cents(form.get("extra_staff") || 0),
+    video_addon_cents: optionalCents(form.get("video_addon")),
     translations,
     code: String(form.get("code")),
     name: String(form.get("name")),

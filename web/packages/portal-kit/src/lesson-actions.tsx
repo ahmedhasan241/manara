@@ -1,11 +1,12 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CirclePlay, LogIn, Square, XCircle } from "lucide-react";
 import type { LiveLesson } from "@educloud/api-client";
 import { Button, ConfirmDialog, Countdown, cn, useActionToast, useT } from "@educloud/ui";
 import { cancelLesson, endLesson, joinLesson, startLesson } from "./actions/lessons";
+import { UpgradeNotice, upgradeCode } from "./upgrade-notice";
 
 /**
  * Join for students; start / end / cancel for the teacher. Meetings open in a new
@@ -16,13 +17,16 @@ export function LessonActions({ lesson, canHost, size = "md", className }: { les
   const router = useRouter();
   const notify = useActionToast();
   const [pending, start] = useTransition();
+  // e.g. no video meetings in the package: the reason stays here with a link to add them.
+  const [upgrade, setUpgrade] = useState<string | null>(null);
 
   /** Runs an action with a toast (joining only toasts on failure); `open` picks the meeting URL to open. */
-  function run<D>(action: () => Promise<{ ok: true; message?: string; data?: D } | { ok: false; error: string }>, open?: (data: D) => string | undefined, quiet = false) {
+  function run<D>(action: () => Promise<{ ok: true; message?: string; data?: D } | { ok: false; error: string; code?: string }>, open?: (data: D) => string | undefined, quiet = false) {
     // Open the tab synchronously so pop-up blockers allow it, then point it at the meeting.
     const tab = open ? window.open("about:blank", "_blank") : null;
     start(async () => {
       const result = await action();
+      setUpgrade(!result.ok && upgradeCode(result) ? result.error : null);
       if (!result.ok) {
         tab?.close();
         notify(result);
@@ -83,6 +87,7 @@ export function LessonActions({ lesson, canHost, size = "md", className }: { les
           )
         )}
       </div>
+      {upgrade && <UpgradeNotice message={upgrade} />}
     </div>
   );
 }

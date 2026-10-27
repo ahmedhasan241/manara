@@ -23,7 +23,7 @@ import { buttonClass, cn } from "../components";
 import { ArchPhoto, PhotoTile, type PhotoName } from "../imagery";
 import { DoodleStar } from "../doodles";
 import { StackedCards } from "../kinetic";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../primitives";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Switch } from "../primitives";
 import { useFormat, useT } from "../i18n-provider";
 
 const FEATURE_ICONS: Record<string, LucideIcon> = {
@@ -207,6 +207,7 @@ export function Packages({ plans }: { plans: Plan[] }) {
                   <p className={cn("text-xs", isFeatured ? "text-white/60" : "text-ink-muted")}>
                     {yearly ? t("{price} billed yearly", { price: fmt.money(plan.price_yearly_cents, plan.currency) }) : t("Billed monthly · cancel anytime")}
                   </p>
+                  <PlanExtras plan={plan} yearly={yearly} featured={isFeatured} />
                   <ul className="mt-8 space-y-3 text-sm">
                     {[
                       plan.max_students ? t("Up to {count} students", { count: plan.max_students }) : t("Unlimited students"),
@@ -222,7 +223,7 @@ export function Packages({ plans }: { plans: Plan[] }) {
                   </ul>
                 </div>
                 <Link
-                  href={`/signup?plan=${plan.code}`}
+                  href={`/signup?plan=${plan.code}${yearly ? "&interval=yearly" : ""}`}
                   className={cn("relative mt-8 w-full", isFeatured ? cn(buttonClass("secondary", "lg"), "border-white bg-white text-brand-700 hover:bg-brand-50") : buttonClass("primary", "lg"))}
                 >
                   {t("Start 14-day free trial")}
@@ -231,6 +232,171 @@ export function Packages({ plans }: { plans: Plan[] }) {
             </Reveal>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+/** A monthly price per month: as is, or its yearly price (10 months) spread over 12. */
+const perMonth = (monthlyCents: number, yearly: boolean) => (yearly ? Math.round((monthlyCents * 10) / 12) : monthlyCents);
+
+/** The video meetings add-on and extra seats under a plan's price. */
+function PlanExtras({ plan, yearly, featured }: { plan: Plan; yearly: boolean; featured: boolean }) {
+  const fmt = useFormat();
+  const t = useT();
+  const muted = featured ? "text-white/70" : "text-ink-muted";
+  const money = (cents: number) => fmt.money(perMonth(cents, yearly), plan.currency);
+  const seats = [
+    plan.max_students != null && plan.extra_student_cents > 0 ? t("Extra student: {price} / month", { price: money(plan.extra_student_cents) }) : null,
+    plan.max_staff != null && plan.extra_staff_cents > 0 ? t("Extra staff member: {price} / month", { price: money(plan.extra_staff_cents) }) : null,
+  ].filter((s): s is string => !!s);
+
+  return (
+    <div className={cn("mt-5 space-y-2 rounded-2xl p-3.5 text-sm", featured ? "bg-white/10" : "bg-surface-2")}>
+      <p className="flex items-start gap-2.5">
+        <Video className={cn("mt-0.5 h-4 w-4 shrink-0", featured ? "text-accent-400" : "text-brand-500")} />
+        {plan.video_addon_cents == null ? (
+          <span className="font-medium">{t("Video meetings included")}</span>
+        ) : (
+          <span>
+            <span className="font-medium">{t("Video meetings add-on")}</span>{" "}
+            <span className="font-semibold">{t("+{price} / month", { price: money(plan.video_addon_cents) })}</span>
+            <span className={cn("block text-xs", muted)}>{t("Free during the 14-day trial")}</span>
+          </span>
+        )}
+      </p>
+      {seats.length > 0 && (
+        <ul className={cn("space-y-0.5 ps-6.5 text-xs", muted)}>
+          {seats.map((s) => (
+            <li key={s}>{s}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/** What a plan costs per billing interval for this many students and staff, with or without video meetings. */
+export function planTotal(plan: Plan, { students, staff, video, yearly }: { students: number; staff: number; video: boolean; yearly: boolean }) {
+  const extraStudents = plan.max_students == null ? 0 : Math.max(0, students - plan.max_students);
+  const extraStaff = plan.max_staff == null ? 0 : Math.max(0, staff - plan.max_staff);
+  const months = yearly ? 10 : 1;
+  const base = yearly ? plan.price_yearly_cents : plan.price_monthly_cents;
+  const studentsCents = extraStudents * plan.extra_student_cents * months;
+  const staffCents = extraStaff * plan.extra_staff_cents * months;
+  const videoCents = video && plan.video_addon_cents != null ? plan.video_addon_cents * months : 0;
+  return { base, extraStudents, extraStaff, studentsCents, staffCents, videoCents, total: base + studentsCents + staffCents + videoCents };
+}
+
+const toCount = (value: string) => Math.max(0, Math.floor(Number(value) || 0));
+
+/** "What would I pay?": students, staff, video meetings and billing in; the cheapest fitting package out. */
+export function PriceCalculator({ plans }: { plans: Plan[] }) {
+  const fmt = useFormat();
+  const t = useT();
+  const [students, setStudents] = useState("100");
+  const [staff, setStaff] = useState("10");
+  const [video, setVideo] = useState(false);
+  const [yearly, setYearly] = useState(false);
+  if (plans.length === 0) return null;
+
+  const input = { students: toCount(students), staff: toCount(staff), video, yearly };
+  const quotes = plans.map((plan) => ({ plan, ...planTotal(plan, input) }));
+  const best = quotes.reduce((a, b) => (b.total < a.total ? b : a));
+  const period = (cents: number, currency: string) =>
+    yearly ? t("{price} / year", { price: fmt.money(cents, currency) }) : t("{price} / month", { price: fmt.money(cents, currency) });
+  const fieldClass = "h-12 w-full rounded-xl border border-line bg-surface px-4 text-base font-semibold outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15";
+
+  return (
+    <div className="mx-auto grid max-w-5xl gap-6 rounded-[2rem] border border-line bg-surface p-6 shadow-[var(--shadow-soft)] sm:p-8 lg:grid-cols-[1fr_1.1fr]">
+      <div className="space-y-5">
+        <div className="grid grid-cols-2 gap-4">
+          <label className="block text-sm font-medium">
+            {t("Number of students")}
+            <input type="number" inputMode="numeric" min={0} value={students} onChange={(e) => setStudents(e.target.value)} className={cn(fieldClass, "mt-1.5")} />
+          </label>
+          <label className="block text-sm font-medium">
+            {t("Number of staff")}
+            <input type="number" inputMode="numeric" min={0} value={staff} onChange={(e) => setStaff(e.target.value)} className={cn(fieldClass, "mt-1.5")} />
+          </label>
+        </div>
+        <label className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl bg-surface-2 p-4">
+          <span className="flex items-start gap-3">
+            <Video className="mt-0.5 h-5 w-5 shrink-0 text-brand-500" />
+            <span>
+              <span className="block text-sm font-semibold">{t("Video meetings")}</span>
+              <span className="block text-xs text-ink-muted">{t("Live lessons over Zoom or Jitsi")}</span>
+            </span>
+          </span>
+          <Switch checked={video} onCheckedChange={setVideo} aria-label={t("Video meetings")} />
+        </label>
+        <div className="flex rounded-2xl bg-surface-2 p-1 text-sm font-semibold" role="radiogroup" aria-label={t("Bill yearly")}>
+          {[false, true].map((y) => (
+            <button
+              key={String(y)}
+              type="button"
+              role="radio"
+              aria-checked={yearly === y}
+              onClick={() => setYearly(y)}
+              className={cn("flex-1 rounded-xl px-4 py-2.5 transition-colors", yearly === y ? "bg-surface text-ink shadow-[var(--shadow-soft)]" : "text-ink-muted hover:text-ink")}
+            >
+              {y ? t("Yearly") : t("Monthly")}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-col rounded-[1.5rem] bg-nav p-6 text-white">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent-400">{t("Best fit")}</p>
+        <h3 className="mt-1 font-display text-2xl font-bold !text-white">{best.plan.name}</h3>
+        <AnimatePresence mode="wait">
+          <motion.p key={`${best.plan.id}-${best.total}-${yearly}`} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="mt-3 font-display text-4xl font-bold tracking-tight">
+            {period(best.total, best.plan.currency)}
+          </motion.p>
+        </AnimatePresence>
+        <dl className="mt-4 space-y-1.5 text-sm text-white/75">
+          <div className="flex justify-between gap-4">
+            <dt>{best.plan.name}</dt>
+            <dd>{fmt.money(best.base, best.plan.currency)}</dd>
+          </div>
+          {best.studentsCents > 0 && (
+            <div className="flex justify-between gap-4">
+              <dt>{t("Extra students: {count}", { count: fmt.number(best.extraStudents) })}</dt>
+              <dd>{fmt.money(best.studentsCents, best.plan.currency)}</dd>
+            </div>
+          )}
+          {best.staffCents > 0 && (
+            <div className="flex justify-between gap-4">
+              <dt>{t("Extra staff: {count}", { count: fmt.number(best.extraStaff) })}</dt>
+              <dd>{fmt.money(best.staffCents, best.plan.currency)}</dd>
+            </div>
+          )}
+          {video && (
+            <div className="flex justify-between gap-4">
+              <dt>{t("Video meetings")}</dt>
+              <dd>{best.plan.video_addon_cents == null ? t("Included") : fmt.money(best.videoCents, best.plan.currency)}</dd>
+            </div>
+          )}
+        </dl>
+        {quotes.length > 1 && (
+          <ul className="mt-5 space-y-1 border-t border-white/15 pt-4 text-xs text-white/60">
+            {quotes
+              .filter((q) => q.plan.id !== best.plan.id)
+              .map((q) => (
+                <li key={q.plan.id} className="flex justify-between gap-4">
+                  <span>{q.plan.name}</span>
+                  <span>{period(q.total, q.plan.currency)}</span>
+                </li>
+              ))}
+          </ul>
+        )}
+        <Link
+          href={`/signup?plan=${best.plan.code}${yearly ? "&interval=yearly" : ""}`}
+          className={cn(buttonClass("secondary", "lg"), "mt-6 w-full border-white bg-white text-brand-700 hover:bg-brand-50")}
+        >
+          {t("Start 14-day free trial")}
+        </Link>
+        {video && best.plan.video_addon_cents != null && <p className="mt-2 text-center text-xs text-white/60">{t("Video meetings are free during the 14-day trial.")}</p>}
       </div>
     </div>
   );

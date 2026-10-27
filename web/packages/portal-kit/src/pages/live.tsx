@@ -1,5 +1,6 @@
 import { Radio, Video } from "lucide-react";
-import { EmptyState, PageHeader, Stagger, StaggerItem } from "@educloud/ui";
+import Link from "next/link";
+import { Alert, EmptyState, PageHeader, Stagger, StaggerItem } from "@educloud/ui";
 import { getContext } from "../session";
 import { LessonCard } from "../lesson-card";
 import { ScheduleLessonLink } from "../schedule-lesson-form";
@@ -15,7 +16,8 @@ export default async function LivePage() {
   const t = await getT();
   const { api, can } = await getContext();
   const canHost = can("courses.manage");
-  const lessons = await api.upcomingLessons();
+  // Owners and admins can see the package; teachers can't (and get the reason when they try to start).
+  const [lessons, billing] = await Promise.all([api.upcomingLessons(), can("tenant.manage") ? api.billing().catch(() => null) : null]);
 
   const live = lessons.filter((l) => l.status === "live");
   const upcoming = lessons.filter((l) => l.status === "scheduled");
@@ -30,6 +32,17 @@ export default async function LivePage() {
         description={t("Join lectures from anywhere. Recordings appear on the course page when a lesson ends.")}
         actions={canHost && <ScheduleLessonLink />}
       />
+
+      {billing && !billing.video_meetings && (
+        <div className="mb-8">
+          <Alert tone="warning">
+            {t("Your package doesn't include video meetings, so live lessons can't be scheduled or started.")}{" "}
+            <Link href="/billing" className="font-semibold underline underline-offset-2">
+              {t("Add video meetings")}
+            </Link>
+          </Alert>
+        </div>
+      )}
 
       {live.length > 0 && (
         <section aria-labelledby="live-heading" className="mb-10">

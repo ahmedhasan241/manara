@@ -8,6 +8,7 @@ import { CalendarPlus, ChevronDown, NotebookPen } from "lucide-react";
 import { Button, Card, Field, FormActions, Input, Select, Textarea, buttonClass, useStateToast, useT } from "@educloud/ui";
 import { scheduleLesson, type FormState } from "./actions/lessons";
 import { LessonPlanFields } from "./lesson-plan-fields";
+import { UpgradeNotice, upgradeCode } from "./upgrade-notice";
 
 type Courses = { id: string; title: string; code: string }[];
 
@@ -26,6 +27,8 @@ export function ScheduleLessonForm({ courses, defaultCourseId, page }: { courses
   const form = useRef<HTMLFormElement>(null);
   const [offset, setOffset] = useState(0);
   useStateToast(state);
+  // No video meetings in the package: keep the reason on screen with a link to add them.
+  const upgrade = state.ok === false && state.error && upgradeCode(state) ? <UpgradeNotice message={state.error} className="mb-4" /> : null;
 
   useEffect(() => setOffset(new Date().getTimezoneOffset()), []);
   useEffect(() => {
@@ -95,6 +98,7 @@ export function ScheduleLessonForm({ courses, defaultCourseId, page }: { courses
   if (page) {
     return (
       <form ref={form} action={action}>
+        {upgrade}
         <Card className="p-4 sm:p-6">
           <p className="mb-5 text-sm text-ink-muted">{t("Students get a notification now, a reminder 15 minutes before, and an alert when you start.")}</p>
           <div className="grid gap-4 sm:grid-cols-6">
@@ -129,6 +133,7 @@ export function ScheduleLessonForm({ courses, defaultCourseId, page }: { courses
               <div aria-hidden className="absolute -end-16 -top-16 h-40 w-40 rounded-full bg-brand-500/10 blur-2xl" />
               <h2 className="mb-1 font-display text-lg font-bold">{t("Schedule a live lesson")}</h2>
               <p className="mb-5 text-sm text-ink-muted">{t("Students get a notification now, a reminder 15 minutes before, and an alert when you start.")}</p>
+              {upgrade}
               <form ref={form} action={action} className="grid gap-4 sm:grid-cols-6">
                 {fields}
                 <label className="flex items-center gap-2 text-sm sm:col-span-4">

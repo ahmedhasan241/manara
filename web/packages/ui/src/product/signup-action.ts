@@ -23,6 +23,8 @@ export async function signup(_prev: SignupState, form: FormData): Promise<Signup
       workspace_slug: String(form.get("workspace_slug") ?? ""),
       workspace_type: String(form.get("workspace_type") ?? "school"),
       plan: String(form.get("plan") ?? "") || undefined,
+      interval: form.get("interval") === "yearly" ? "yearly" : form.get("interval") === "monthly" ? "monthly" : undefined,
+      video_addon: form.get("video_addon") === "1",
     });
   } catch (error) {
     if (error instanceof ApiError) {

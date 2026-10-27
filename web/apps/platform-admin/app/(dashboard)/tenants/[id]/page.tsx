@@ -7,6 +7,7 @@ import { Avatar, Badge, Card, FilterChips, PageHeader, Stagger, StaggerItem, Sta
 import { ChangePlanForm } from "@/components/change-plan-form";
 import { setTenantStatus } from "../../../actions";
 import { ToastButton } from "@/components/toast-button";
+import { subscriptionPrice, subscriptionSeats } from "@/lib/subscription-price";
 import { getFormat, getT } from "@educloud/ui/locale";
 
 export async function generateMetadata() {
@@ -74,7 +75,7 @@ export default async function TenantPage({ params, searchParams }: { params: Pro
           <StatCard label={t("Parents")} value={counts.parent ?? 0} icon={<HeartHandshake className="h-5 w-5" />} accent="amber" />
         </StaggerItem>
         <StaggerItem>
-          <StatCard label={t("Package")} value={current?.plan.name ?? "—"} hint={current ? `${t(asKey(current.status))} · ${fmt.money(current.plan.price_monthly_cents, current.plan.currency)}/mo` : undefined} icon={<Shield className="h-5 w-5" />} accent="live" />
+          <StatCard label={t("Package")} value={current?.plan.name ?? "—"} hint={current ? [t(asKey(current.status)), subscriptionPrice(current, fmt, t), subscriptionSeats(current, t), current.video_addon ? t("Video") : ""].filter(Boolean).join(" · ") : undefined} icon={<Shield className="h-5 w-5" />} accent="live" />
         </StaggerItem>
       </Stagger>
 
@@ -119,18 +120,23 @@ export default async function TenantPage({ params, searchParams }: { params: Pro
         <div className="space-y-6">
           <Card>
             <h2 className="mb-4 font-display font-bold">{t("Change package")}</h2>
-            <ChangePlanForm tenantId={tenant.id} plans={plans} currentPlanId={current?.plan.id} />
+            <ChangePlanForm key={current?.id} tenantId={tenant.id} plans={plans} current={current} />
           </Card>
           <Card>
             <h2 className="mb-4 font-display font-bold">{t("Subscription history")}</h2>
             <ol className="space-y-3">
               {[...tenant.subscriptions].reverse().map((s) => (
                 <li key={s.id} className="flex items-center justify-between gap-2 text-sm">
-                  <span>
+                  <span className="min-w-0">
                     <span className="block font-semibold">{s.plan.name}</span>
-                    <span className="text-xs text-ink-muted">{fmt.date(s.created_at)}</span>
+                    <span className="block text-xs tabular-nums text-ink-muted">
+                      {[fmt.date(s.created_at), subscriptionPrice(s, fmt, t), subscriptionSeats(s, t)].filter(Boolean).join(" · ")}
+                    </span>
                   </span>
-                  <Badge tone={statusTone[s.status]}>{t(asKey(s.status))}</Badge>
+                  <span className="flex shrink-0 items-center gap-1">
+                    {s.video_addon && <Badge tone="brand">{t("Video")}</Badge>}
+                    <Badge tone={statusTone[s.status]}>{t(asKey(s.status))}</Badge>
+                  </span>
                 </li>
               ))}
             </ol>
