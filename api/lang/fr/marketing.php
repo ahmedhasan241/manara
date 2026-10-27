@@ -59,7 +59,7 @@ return [
             [
                 'icon' => 'video',
                 'title' => 'Cours en direct',
-                'body' => 'Planifiez des cours Zoom ou Jitsi. Les élèves reçoivent des rappels, rejoignent en un geste, et les enregistrements arrivent sur la page du cours.',
+                'body' => 'Planifiez des cours Zoom ou Jitsi. Les élèves reçoivent des rappels, rejoignent en un geste, et les enregistrements arrivent sur la page du cours. Disponible sur chaque formule en option — gratuite pendant l’essai.',
             ],
             [
                 'icon' => 'grades',
@@ -126,6 +126,10 @@ return [
             [
                 'question' => 'Faut-il un compte Zoom pour les cours en direct ?',
                 'answer' => 'Non. Les cours fonctionnent directement avec Jitsi Meet. Connectez Zoom pour des enregistrements cloud automatiques.',
+            ],
+            [
+                'question' => 'Comment les prix sont-ils fixés ?',
+                'answer' => 'Les prix sont fixés dans la devise de votre pays. Chaque formule inclut un nombre d’élèves et de membres du personnel, et vous pouvez ajouter des places à tout moment. Les réunions vidéo sont une option, gratuite pendant l’essai de 14 jours.',
             ],
             [
                 'question' => 'Pouvons-nous exporter nos données ?',

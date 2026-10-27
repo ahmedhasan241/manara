@@ -59,7 +59,7 @@ return [
             [
                 'icon' => 'video',
                 'title' => 'Aulas ao vivo',
-                'body' => 'Agende aulas no Zoom ou Jitsi. Os alunos recebem lembretes, entram com um toque e as gravações chegam à página do curso.',
+                'body' => 'Agende aulas no Zoom ou Jitsi. Os alunos recebem lembretes, entram com um toque e as gravações chegam à página do curso. Disponível em todos os pacotes como complemento, grátis durante o teste.',
             ],
             [
                 'icon' => 'grades',
@@ -126,6 +126,10 @@ return [
             [
                 'question' => 'Preciso de uma conta no Zoom para as aulas ao vivo?',
                 'answer' => 'Não. As aulas funcionam direto com o Jitsi Meet. Conecte o Zoom para ter gravações automáticas na nuvem.',
+            ],
+            [
+                'question' => 'Como os preços são definidos?',
+                'answer' => 'Os preços são definidos na moeda do seu país. Cada pacote inclui um número de alunos e de membros da equipe, e você pode adicionar vagas a qualquer momento. Reuniões por vídeo são um complemento, grátis durante o teste de 14 dias.',
             ],
             [
                 'question' => 'Podemos exportar nossos dados?',

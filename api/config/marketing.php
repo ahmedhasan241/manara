@@ -56,7 +56,7 @@ return [
         ],
 
         'features' => [
-            ['icon' => 'video', 'title' => 'Live lessons', 'body' => 'Schedule Zoom or Jitsi lectures. Students get reminders, join in one tap, and recordings land on the course page.'],
+            ['icon' => 'video', 'title' => 'Live lessons', 'body' => 'Schedule Zoom or Jitsi lectures. Students get reminders, join in one tap, and recordings land on the course page. Available on every package as an add-on — free during the trial.'],
             ['icon' => 'grades', 'title' => 'Gradebook', 'body' => 'Weighted assessments, feedback and grade trends for every student.'],
             ['icon' => 'attendance', 'title' => 'Attendance', 'body' => 'Take the roll on any phone, even offline. Live lessons take attendance automatically.'],
             ['icon' => 'family', 'title' => 'Family portal', 'body' => 'Parents follow each child’s grades, attendance and deadlines, with alerts when something slips.'],
@@ -76,6 +76,7 @@ return [
             ['question' => 'Is there a free trial?', 'answer' => 'Yes. Every package starts with 14 days free and no credit card.'],
             ['question' => 'Do parents and students pay?', 'answer' => 'No. The school, university or teacher subscribes; students and families use Manara for free.'],
             ['question' => 'Do I need a Zoom account for live lessons?', 'answer' => 'No. Lessons work out of the box with Jitsi Meet. Connect Zoom to get automatic cloud recordings.'],
+            ['question' => 'How is pricing set?', 'answer' => 'Prices are set in your country’s currency. Each package includes a number of students and staff, and you can add seats at any time. Video meetings are an add-on, free during the 14-day trial.'],
             ['question' => 'Can we export our data?', 'answer' => 'Yes. Grades and attendance export to CSV at any time, and every user can download their own data.'],
             ['question' => 'Where is our data stored?', 'answer' => 'In encrypted, backed-up cloud storage. The University package offers data residency.'],
         ],

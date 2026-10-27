@@ -59,7 +59,7 @@ return [
             [
                 'icon' => 'video',
                 'title' => 'Clases en directo',
-                'body' => 'Programa clases por Zoom o Jitsi. Los alumnos reciben recordatorios, entran con un toque y las grabaciones llegan a la página del curso.',
+                'body' => 'Programa clases por Zoom o Jitsi. Los alumnos reciben recordatorios, entran con un toque y las grabaciones llegan a la página del curso. Disponible en todos los paquetes como complemento, gratis durante la prueba.',
             ],
             [
                 'icon' => 'grades',
@@ -126,6 +126,10 @@ return [
             [
                 'question' => '¿Necesito una cuenta de Zoom para las clases en directo?',
                 'answer' => 'No. Las clases funcionan de serie con Jitsi Meet. Conecta Zoom para tener grabaciones automáticas en la nube.',
+            ],
+            [
+                'question' => '¿Cómo se fijan los precios?',
+                'answer' => 'Los precios se fijan en la moneda de tu país. Cada paquete incluye un número de estudiantes y de personal, y puedes añadir plazas cuando quieras. Las videoreuniones son un complemento, gratis durante la prueba de 14 días.',
             ],
             [
                 'question' => '¿Podemos exportar nuestros datos?',
