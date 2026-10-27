@@ -52,16 +52,27 @@ export const TIMEZONE_COUNTRY: Record<string, string> = {
 export function pickCurrency(input: { saved?: string | null; country?: string | null; timeZone?: string | null; acceptLanguage?: string | null }): Currency {
   if (isCurrency(input.saved)) return input.saved;
 
-  const fromCountry = (code?: string | null) => (code ? COUNTRY_CURRENCY[code.toUpperCase()] : undefined);
-  const byGeo = fromCountry(input.country);
-  if (byGeo) return byGeo;
+  const country = pickCountry(input);
+  return (country ? COUNTRY_CURRENCY[country] : undefined) ?? BASE_CURRENCY;
+}
 
-  const byZone = fromCountry(input.timeZone ? TIMEZONE_COUNTRY[input.timeZone] : null);
+/**
+ * The visitor's country (ISO code), for prices set per country: the hosting
+ * provider's geo header, then the browser's time zone, then the region in
+ * Accept-Language. Null when none of them tell.
+ */
+export function pickCountry(input: { country?: string | null; timeZone?: string | null; acceptLanguage?: string | null }): string | null {
+  const known = (code?: string | null) => (code && COUNTRY_CURRENCY[code.toUpperCase()] ? code.toUpperCase() : null);
+
+  const byGeo = input.country && /^[A-Za-z]{2}$/.test(input.country) ? input.country.toUpperCase() : null;
+  if (byGeo && byGeo !== "XX") return byGeo;
+
+  const byZone = known(input.timeZone ? TIMEZONE_COUNTRY[input.timeZone] : null);
   if (byZone) return byZone;
 
   const region = (input.acceptLanguage ?? "")
     .split(",")
     .map((part) => part.split(";")[0]!.trim().split("-")[1])
-    .find((r) => r && fromCountry(r));
-  return fromCountry(region) ?? BASE_CURRENCY;
+    .find((r) => known(r));
+  return known(region);
 }

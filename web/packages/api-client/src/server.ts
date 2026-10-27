@@ -1,6 +1,6 @@
 import { cookies, headers } from "next/headers";
 import { createClient } from "./index";
-import { CURRENCY_COOKIE, TIMEZONE_COOKIE, pickCurrency, type Currency } from "./currency";
+import { CURRENCY_COOKIE, TIMEZONE_COOKIE, pickCountry, pickCurrency, type Currency } from "./currency";
 
 /**
  * Server-only helpers for Next.js apps. The API token lives in an httpOnly cookie
@@ -21,13 +21,25 @@ const LOCALE_COOKIE = "locale";
  * header from the host, or the time zone their browser reported).
  */
 export async function resolveCurrency(): Promise<Currency> {
+  const jar = await cookies();
+  return pickCurrency({ saved: jar.get(CURRENCY_COOKIE)?.value, ...(await geoSignals()) });
+}
+
+/**
+ * The visitor's country, which decides the prices they're offered (plans can
+ * be priced per country). Null when it can't be told.
+ */
+export async function resolveCountry(): Promise<string | null> {
+  return pickCountry(await geoSignals());
+}
+
+async function geoSignals() {
   const [jar, head] = await Promise.all([cookies(), headers()]);
-  return pickCurrency({
-    saved: jar.get(CURRENCY_COOKIE)?.value,
+  return {
     country: head.get("x-vercel-ip-country") ?? head.get("cf-ipcountry") ?? head.get("cloudfront-viewer-country") ?? head.get("x-country-code"),
     timeZone: jar.get(TIMEZONE_COOKIE)?.value ? decodeURIComponent(jar.get(TIMEZONE_COOKIE)!.value) : null,
     acceptLanguage: head.get("accept-language"),
-  });
+  };
 }
 
 /**
@@ -55,6 +67,7 @@ export async function serverClient() {
     student: jar.get(STUDENT_COOKIE)?.value,
     locale: (await headers()).get("x-educloud-locale") ?? jar.get(LOCALE_COOKIE)?.value ?? "ar",
     currency: await resolveCurrency(),
+    country: await resolveCountry(),
     init: { cache: "no-store" },
   });
 }

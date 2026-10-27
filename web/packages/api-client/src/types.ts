@@ -56,22 +56,79 @@ export interface Plan {
   description: string | null;
   price_monthly_cents: number;
   price_yearly_cents: number;
+  /** Monthly price of each seat beyond the plan's included students / staff. */
+  extra_student_cents: number;
+  extra_staff_cents: number;
+  /** Monthly price of the video meetings add-on; null when video meetings are included. */
+  video_addon_cents: number | null;
   currency: string;
+  /** Public plans: the country whose own price this is (null: the default price). */
+  price_country?: string | null;
   max_students: number | null;
   max_staff: number | null;
   storage_gb: number;
   features: string[] | null;
   is_active: boolean;
   subscriptions_count?: number;
+  /** Admin only: prices per country. */
+  prices?: PlanPrice[];
 }
+
+/** A plan's price in one country, in that country's currency. */
+export interface PlanPrice {
+  country: string;
+  currency: string;
+  price_monthly_cents: number;
+  price_yearly_cents: number;
+  extra_student_cents: number;
+  extra_staff_cents: number;
+  video_addon_cents: number | null;
+}
+
+/** What platform admins send to create or update a plan. */
+export type PlanInput = Partial<Omit<Plan, "prices" | "id" | "subscriptions_count" | "price_country" | "includes_previous">> & { prices?: PlanPrice[] };
+
+export type BillingInterval = "monthly" | "yearly";
 
 export interface Subscription {
   id: number;
   status: "trialing" | "active" | "past_due" | "canceled";
-  interval: "monthly" | "yearly";
+  interval: BillingInterval;
+  extra_students: number;
+  extra_staff: number;
+  video_addon: boolean;
+  country: string | null;
+  currency: string | null;
+  /** The agreed price per billing interval, with seats and add-ons. */
+  amount_cents: number | null;
   trial_ends_at: string | null;
   current_period_ends_at: string | null;
   plan?: Plan;
+}
+
+export interface SeatUsage {
+  used: number;
+  /** Null: unlimited. */
+  limit: number | null;
+}
+
+/** The workspace's package, for owners and admins (GET /billing). */
+export interface Billing {
+  subscription: Pick<Subscription, "id" | "status" | "interval" | "extra_students" | "extra_staff" | "video_addon" | "country" | "currency" | "amount_cents" | "trial_ends_at" | "current_period_ends_at">;
+  /** The current plan, priced for the workspace's country. */
+  plan: Plan;
+  seats: { students: SeatUsage; staff: SeatUsage };
+  video_meetings: boolean;
+  /** Plans the workspace can switch to, priced for its country. */
+  plans: Plan[];
+}
+
+export interface BillingChange {
+  plan?: string;
+  interval?: BillingInterval;
+  extra_students?: number;
+  extra_staff?: number;
+  video_addon?: boolean;
 }
 
 export interface Tenant {

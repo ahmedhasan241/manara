@@ -1,4 +1,5 @@
 import { createClient, type MarketingContent, type Plan } from "@educloud/api-client";
+import { resolveCountry } from "@educloud/api-client/server";
 import type { Translate } from "../translate";
 import { getI18n } from "../locale-server";
 
@@ -25,14 +26,14 @@ function fallback(t: Translate): SiteContent {
 }
 
 /**
- * Website content edited from the platform admin, in the visitor's language.
- * Cached for a minute (per language) so edits appear quickly without hitting
- * the API on every visit.
+ * Website content edited from the platform admin, in the visitor's language,
+ * with plans priced for their country. Cached for a minute (per language and
+ * country) so edits appear quickly without hitting the API on every visit.
  */
 export async function loadContent(): Promise<SiteContent> {
-  const { t, locale } = await getI18n();
+  const [{ t, locale }, country] = await Promise.all([getI18n(), resolveCountry()]);
   try {
-    return await createClient({ baseUrl: process.env.API_URL ?? "http://localhost:8001", locale, init: { next: { revalidate: 60, tags: ["marketing"] } } }).marketing();
+    return await createClient({ baseUrl: process.env.API_URL ?? "http://localhost:8001", locale, country, init: { next: { revalidate: 60, tags: ["marketing"] } } }).marketing();
   } catch {
     return fallback(t);
   }

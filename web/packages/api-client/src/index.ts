@@ -1,4 +1,8 @@
 import type {
+  Billing,
+  BillingChange,
+  BillingInterval,
+  PlanInput,
   UserLocationInput,
   AcademicLevel,
   AcademicSettings,
@@ -90,6 +94,8 @@ export interface ClientOptions {
   locale?: string | null;
   /** Currency to quote prices in (X-Currency). */
   currency?: string | null;
+  /** The visitor's country, for plans priced per country (X-Country). */
+  country?: string | null;
   /** Passed to fetch, e.g. Next.js `{ next: { revalidate: 60 } }`. */
   init?: RequestInit & { next?: { revalidate?: number | false; tags?: string[] } };
 }
@@ -105,7 +111,7 @@ export class ApiError extends Error {
   }
 }
 
-export function createClient({ baseUrl, token, tenant, student, locale, currency, init }: ClientOptions) {
+export function createClient({ baseUrl, token, tenant, student, locale, currency, country, init }: ClientOptions) {
   async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
     const headers: Record<string, string> = { Accept: "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
@@ -113,6 +119,7 @@ export function createClient({ baseUrl, token, tenant, student, locale, currency
     if (student) headers["X-Student"] = student;
     if (locale) headers["X-Locale"] = locale;
     if (currency) headers["X-Currency"] = currency;
+    if (country) headers["X-Country"] = country;
     if (body !== undefined && !(body instanceof FormData)) headers["Content-Type"] = "application/json";
 
     const response = await fetch(`${baseUrl.replace(/\/$/, "")}/api/v1${path}`, {
@@ -198,6 +205,8 @@ export function createClient({ baseUrl, token, tenant, student, locale, currency
       workspace_slug: string;
       workspace_type: string;
       plan?: string;
+      interval?: BillingInterval;
+      video_addon?: boolean;
     } & UserLocationInput) => request<{ token: string; user: User }>("POST", "/auth/register", data),
     login: (email: string, password: string, device_name = "web") =>
       request<LoginResult>("POST", "/auth/login", { email, password, device_name }),
@@ -221,6 +230,8 @@ export function createClient({ baseUrl, token, tenant, student, locale, currency
     // Workspace
     workspace: () => get<Workspace>("/workspace"),
     updateWorkspace: (data: Partial<Tenant>) => request<Tenant>("PATCH", "/workspace", data),
+    billing: () => get<Billing>("/billing"),
+    updateBilling: (data: BillingChange) => request<Billing>("PATCH", "/billing", data),
     courses: (params: { search?: string; page?: number; category?: string } = {}) => get<Paginated<Course>>(`/courses${qs(params)}`),
     course: (id: string) => get<Course>(`/courses/${id}`),
     createCourse: (data: Pick<Course, "code" | "title"> & Partial<Course>) => request<Course>("POST", "/courses", data),
@@ -354,7 +365,7 @@ export function createClient({ baseUrl, token, tenant, student, locale, currency
     platformTenant: (id: number) => get<{ tenant: Tenant & { subscriptions: (Subscription & { plan: Plan; created_at: string })[] }; counts: Partial<Record<Role, number>> }>(`/platform/tenants/${id}`),
     platformTenantMembers: (id: number, params: { role?: string; search?: string; page?: number } = {}) =>
       get<Paginated<{ id: number; role: Role; user: { id: number; name: string; email: string; last_login_at: string | null; suspended_at: string | null } }>>(`/platform/tenants/${id}/members${qs(params)}`),
-    platformChangePlan: (tenantId: number, data: { plan_id: number; status: string; interval?: string; current_period_ends_at?: string | null }) =>
+    platformChangePlan: (tenantId: number, data: { plan_id: number; status: string; interval?: string; extra_students?: number; extra_staff?: number; video_addon?: boolean; current_period_ends_at?: string | null }) =>
       request<Subscription>("POST", `/platform/tenants/${tenantId}/subscription`, data),
     platformUsers: (params: { search?: string; role?: string; status?: string; tenant_id?: number; page?: number } = {}) =>
       get<Paginated<PlatformUser>>(`/platform/users${qs(params)}`),
@@ -364,8 +375,8 @@ export function createClient({ baseUrl, token, tenant, student, locale, currency
     platformSubscriptions: (params: { status?: string; page?: number } = {}) => get<Paginated<PlatformSubscription>>(`/platform/subscriptions${qs(params)}`),
     platformUpdateSubscription: (id: number, data: { status?: string; trial_ends_at?: string | null; current_period_ends_at?: string | null }) =>
       request<PlatformSubscription>("PATCH", `/platform/subscriptions/${id}`, data),
-    platformCreatePlan: (data: Partial<Plan>) => request<Plan>("POST", "/platform/plans", data),
-    platformUpdatePlan: (id: number, data: Partial<Plan>) => request<Plan>("PATCH", `/platform/plans/${id}`, data),
+    platformCreatePlan: (data: PlanInput) => request<Plan>("POST", "/platform/plans", data),
+    platformUpdatePlan: (id: number, data: PlanInput) => request<Plan>("PATCH", `/platform/plans/${id}`, data),
     platformWebsite: () => get<MarketingContent>("/platform/website"),
     platformUpdateWebsite: <K extends keyof MarketingContent>(key: K, content: MarketingContent[K]) =>
       request<MarketingContent[K]>("PUT", `/platform/website/${key}`, { content }),
