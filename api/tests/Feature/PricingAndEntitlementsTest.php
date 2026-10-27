@@ -7,9 +7,12 @@ use App\Events\LiveLessonUpdated;
 use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\Tenant;
+use App\Models\User;
+use App\Support\Totp;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class PricingAndEntitlementsTest extends TestCase
@@ -59,6 +62,38 @@ class PricingAndEntitlementsTest extends TestCase
             ->assertJsonPath('0.currency', 'USD')
             ->assertJsonPath('0.price_monthly_cents', 39900)
             ->assertJsonPath('0.price_country', null);
+    }
+
+    public function test_what_a_plan_includes_can_differ_by_country(): void
+    {
+        $this->plan->prices()->where('country', 'SA')->update(['max_students' => 5, 'storage_gb' => 50]);
+
+        $this->getJson('/api/v1/plans', ['X-Country' => 'SA'])->assertOk()
+            ->assertJsonPath('0.max_students', 5)
+            ->assertJsonPath('0.max_staff', 2)
+            ->assertJsonPath('0.storage_gb', 50);
+        $this->getJson('/api/v1/plans', ['X-Country' => 'US'])->assertOk()->assertJsonPath('0.max_students', 2);
+
+        // A Saudi workspace gets the Saudi allowance plus its extra seats.
+        $tenant = $this->subscribed(['country' => 'SA', 'extra_students' => 1]);
+        $owner = $this->member($tenant, Role::Owner);
+        $this->asMember($owner, $tenant, 'GET', '/api/v1/billing')->assertOk()
+            ->assertJsonPath('seats.students.limit', 6)
+            ->assertJsonPath('plan.max_students', 5);
+    }
+
+    public function test_admins_set_capacity_per_country(): void
+    {
+        $admin = User::factory()->create(['is_platform_admin' => true]);
+        $admin->forceFill(['mfa_secret' => Totp::generateSecret(), 'mfa_enabled_at' => now()])->save();
+        Sanctum::actingAs($admin);
+
+        $this->patchJson("/api/v1/platform/plans/{$this->plan->id}", ['prices' => [
+            ['country' => 'eg', 'currency' => 'egp', 'price_monthly_cents' => 1999900, 'price_yearly_cents' => 19999000, 'max_students' => 1000, 'max_staff' => null, 'storage_gb' => null],
+        ]])->assertOk()->assertJsonPath('prices.0.country', 'EG')->assertJsonPath('prices.0.max_students', 1000);
+
+        $this->assertSame(['EG'], $this->plan->prices()->pluck('country')->all());
+        $this->getJson('/api/v1/plans', ['X-Country' => 'EG'])->assertJsonPath('0.max_students', 1000)->assertJsonPath('0.currency', 'EGP');
     }
 
     public function test_sign_up_fixes_the_local_price_with_the_video_add_on(): void

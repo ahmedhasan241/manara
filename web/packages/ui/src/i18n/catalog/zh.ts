@@ -2293,6 +2293,11 @@ const zh: Record<MessageKey, Translation> = {
   "Video": "视频",
   "Visitors from these countries see their own price instead of the default one. Amounts are in the country's currency.": "来自这些国家/地区的访客将看到各自的价格，而不是默认价格。金额以该国家/地区的货币计。",
   "{country} is listed more than once.": "{country} 被列出了多次。",
+  "Empty = package default": "留空 = 套餐默认值",
+  "Students included": "包含学生数",
+  "Staff included": "包含教职员工数",
+  "Storage included (GB)": "包含存储空间（GB）",
+  "{students} students · {staff} staff": "{students} 名学生 · {staff} 名教职员工",
 };
 
 export default zh;

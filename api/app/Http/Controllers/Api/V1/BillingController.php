@@ -45,7 +45,7 @@ class BillingController extends TenantController
             $subscription->setRelation('plan', Plan::where('code', $data['plan'])->firstOrFail());
             $subscription->plan_id = $subscription->plan->id;
         }
-        $subscription->fill(collect($data)->except('plan')->all());
+        $subscription->fill([...collect($data)->except('plan')->all(), 'country' => $this->tenant()->country]);
 
         $seats = $this->entitlements->seats($this->tenant());
         foreach (['students' => $subscription->studentSeats(), 'staff' => $subscription->staffSeats()] as $kind => $limit) {

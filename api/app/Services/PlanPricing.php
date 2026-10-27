@@ -33,9 +33,7 @@ class PlanPricing
      */
     public function priceFor(Plan $plan, ?string $country): array
     {
-        $local = $country === null ? null : ($plan->relationLoaded('prices')
-            ? $plan->prices->firstWhere('country', $country)
-            : $plan->prices()->where('country', $country)->first());
+        $local = $this->localPrice($plan, $country);
         $source = $local ?? $plan;
 
         $price = ['country' => $local?->country];
@@ -47,14 +45,32 @@ class PlanPricing
     }
 
     /**
-     * The plan as shown to a visitor from this country: translated, in the local price.
+     * What the plan includes in this country: its own allowance unless the country sets one.
+     *
+     * @return array{max_students: int|null, max_staff: int|null, storage_gb: int}
+     */
+    public function capacityFor(Plan $plan, ?string $country): array
+    {
+        $local = $this->localPrice($plan, $country);
+
+        $capacity = [];
+        foreach (PlanPrice::CAPACITY_FIELDS as $field) {
+            $capacity[$field] = $local?->{$field} ?? $plan->{$field};
+        }
+
+        return $capacity;
+    }
+
+    /**
+     * The plan as shown to a visitor from this country: translated, in the
+     * local price, with what it includes there.
      *
      * @return array<string, mixed>
      */
     public function present(Plan $plan, ?string $country): array
     {
         $price = $this->priceFor($plan, $country);
-        $presented = [...$plan->localized(), ...$price, 'price_country' => $price['country']];
+        $presented = [...$plan->localized(), ...$price, ...$this->capacityFor($plan, $country), 'price_country' => $price['country']];
         unset($presented['country'], $presented['prices']);
 
         return $presented;
@@ -81,6 +97,17 @@ class PlanPricing
                 + $monthlyExtras * ($yearly ? self::YEARLY_MONTHS : 1),
             'country' => $price['country'],
         ];
+    }
+
+    private function localPrice(Plan $plan, ?string $country): ?PlanPrice
+    {
+        if ($country === null) {
+            return null;
+        }
+
+        return $plan->relationLoaded('prices')
+            ? $plan->prices->firstWhere('country', $country)
+            : $plan->prices()->where('country', $country)->first();
     }
 
     /**

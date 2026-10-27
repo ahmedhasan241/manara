@@ -50,6 +50,9 @@ export function PlanCard({ plan }: { plan: Plan & { subscriptions_count?: number
               <span key={p.country} className="whitespace-nowrap">
                 {i > 0 && <span className="text-ink-muted"> · </span>}
                 <span className="font-mono font-semibold">{p.country}</span> {fmt.exactMoney(p.price_monthly_cents, p.currency)}
+                {(p.max_students != null || p.max_staff != null) && (
+                  <span className="text-ink-muted"> ({t("{students} students · {staff} staff", { students: fmt.number(p.max_students ?? plan.max_students ?? 0), staff: fmt.number(p.max_staff ?? plan.max_staff ?? 0) })})</span>
+                )}
               </span>
             ))}
           </p>
@@ -198,9 +201,14 @@ interface PriceRow {
   extra_student: string;
   extra_staff: string;
   video: string;
+  /** What the plan includes in this country; empty uses the plan's own. */
+  students: string;
+  staff: string;
+  storage: string;
 }
 
 type AmountField = "monthly" | "yearly" | "extra_student" | "extra_staff" | "video";
+type CapacityField = "students" | "staff" | "storage";
 
 const major = (cents: number | null | undefined) => (cents == null ? "" : String(cents / 100));
 
@@ -221,18 +229,27 @@ function CountryPrices({ initial }: { initial: PlanPrice[] }) {
       extra_student: major(p.extra_student_cents),
       extra_staff: major(p.extra_staff_cents),
       video: major(p.video_addon_cents),
+      students: p.max_students == null ? "" : String(p.max_students),
+      staff: p.max_staff == null ? "" : String(p.max_staff),
+      storage: p.storage_gb == null ? "" : String(p.storage_gb),
     })),
   );
   const [nextKey, setNextKey] = useState(initial.length);
   const update = (key: number, field: Exclude<keyof PriceRow, "key">, value: string) => setRows((all) => all.map((r) => (r.key === key ? { ...r, [field]: value } : r)));
   const add = () => {
-    setRows((all) => [...all, { key: nextKey, country: "", currency: "", monthly: "", yearly: "", extra_student: "", extra_staff: "", video: "" }]);
+    setRows((all) => [...all, { key: nextKey, country: "", currency: "", monthly: "", yearly: "", extra_student: "", extra_staff: "", video: "", students: "", staff: "", storage: "" }]);
     setNextKey((k) => k + 1);
   };
 
   const amount = (row: PriceRow, field: AmountField, label: string, required = false, hint?: string) => (
     <Field label={label} htmlFor={`${id}-${row.key}-${field}`} hint={hint}>
       <Input id={`${id}-${row.key}-${field}`} type="number" step="0.01" min="0" required={required} value={row[field]} onChange={(e) => update(row.key, field, e.target.value)} />
+    </Field>
+  );
+
+  const capacity = (row: PriceRow, field: CapacityField, label: string) => (
+    <Field label={label} htmlFor={`${id}-${row.key}-${field}`} hint={t("Empty = package default")}>
+      <Input id={`${id}-${row.key}-${field}`} type="number" step="1" min="1" value={row[field]} onChange={(e) => update(row.key, field, e.target.value)} />
     </Field>
   );
 
@@ -282,6 +299,9 @@ function CountryPrices({ initial }: { initial: PlanPrice[] }) {
             {amount(row, "extra_student", t("Extra student seat"))}
             {amount(row, "extra_staff", t("Extra staff seat"))}
             {amount(row, "video", t("Video meetings add-on"), false, t("Empty = included"))}
+            {capacity(row, "students", t("Students included"))}
+            {capacity(row, "staff", t("Staff included"))}
+            {capacity(row, "storage", t("Storage included (GB)"))}
           </div>
         </div>
       ))}

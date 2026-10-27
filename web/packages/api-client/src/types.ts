@@ -83,6 +83,10 @@ export interface PlanPrice {
   extra_student_cents: number;
   extra_staff_cents: number;
   video_addon_cents: number | null;
+  /** What the plan includes in this country (null: the plan's own allowance). */
+  max_students?: number | null;
+  max_staff?: number | null;
+  storage_gb?: number | null;
 }
 
 /** What platform admins send to create or update a plan. */

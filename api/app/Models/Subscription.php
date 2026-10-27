@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\PlanPricing;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,11 +21,13 @@ class Subscription extends Model
     }
 
     /**
-     * Students the workspace may have: the plan's allowance plus extra seats (null: unlimited).
+     * Students the workspace may have: what the plan includes in its country plus extra seats (null: unlimited).
      */
     public function studentSeats(): ?int
     {
-        return $this->plan->max_students === null ? null : $this->plan->max_students + $this->extra_students;
+        $included = $this->included('max_students');
+
+        return $included === null ? null : $included + $this->extra_students;
     }
 
     /**
@@ -32,7 +35,14 @@ class Subscription extends Model
      */
     public function staffSeats(): ?int
     {
-        return $this->plan->max_staff === null ? null : $this->plan->max_staff + $this->extra_staff;
+        $included = $this->included('max_staff');
+
+        return $included === null ? null : $included + $this->extra_staff;
+    }
+
+    private function included(string $field): ?int
+    {
+        return app(PlanPricing::class)->capacityFor($this->plan, $this->country ?? $this->tenant?->country)[$field];
     }
 
     /**

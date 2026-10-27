@@ -2293,6 +2293,11 @@ const es: Record<MessageKey, Translation> = {
   "Video": "Video",
   "Visitors from these countries see their own price instead of the default one. Amounts are in the country's currency.": "Los visitantes de estos países ven su propio precio en lugar del predeterminado. Los importes están en la moneda del país.",
   "{country} is listed more than once.": "{country} aparece más de una vez.",
+  "Empty = package default": "Vacío = valor del paquete",
+  "Students included": "Estudiantes incluidos",
+  "Staff included": "Personal incluido",
+  "Storage included (GB)": "Almacenamiento incluido (GB)",
+  "{students} students · {staff} staff": "{students} estudiantes · {staff} de personal",
 };
 
 export default es;

@@ -2295,6 +2295,11 @@ const ar = {
   "Video": "فيديو",
   "Visitors from these countries see their own price instead of the default one. Amounts are in the country's currency.": "يرى الزوار من هذه الدول سعرهم الخاص بدلًا من السعر الافتراضي. المبالغ بعملة الدولة.",
   "{country} is listed more than once.": "{country} مُدرجة أكثر من مرة.",
+  "Empty = package default": "فارغ = الافتراضي للباقة",
+  "Students included": "الطلاب المشمولون",
+  "Staff included": "الموظفون المشمولون",
+  "Storage included (GB)": "التخزين المشمول (غيغابايت)",
+  "{students} students · {staff} staff": "{students} طالب · {staff} موظف",
 } satisfies Record<string, Translation>;
 
 export default ar;
