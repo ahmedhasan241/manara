@@ -176,7 +176,7 @@ export function Packages({ plans }: { plans: Plan[] }) {
       <div className={cn("mx-auto grid max-w-6xl gap-6", plans.length >= 3 ? "lg:grid-cols-3" : "md:grid-cols-2")}>
         {plans.map((plan, i) => {
           const isFeatured = i === featured;
-          const cents = yearly && plan.price_yearly_cents ? Math.round(plan.price_yearly_cents / 12) : plan.price_monthly_cents;
+          const cents = yearly && plan.price_yearly_cents ? tidy(plan.price_yearly_cents / 12) : plan.price_monthly_cents;
           return (
             <Reveal key={plan.id} delay={i * 0.08}>
               <div
@@ -196,13 +196,13 @@ export function Packages({ plans }: { plans: Plan[] }) {
                 <div className="relative flex-1">
                   <h3 className="font-display text-2xl font-bold">{plan.name}</h3>
                   <p className={cn("mt-1 text-sm", isFeatured ? "text-white/70" : "text-ink-muted")}>{plan.description}</p>
-                  <p className="mt-6 flex items-end gap-1">
+                  <p className="mt-6 flex flex-wrap items-baseline gap-x-1.5">
                     <AnimatePresence mode="wait">
-                      <motion.span key={`${plan.id}-${yearly}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="font-display text-5xl font-bold tracking-tight">
+                      <motion.span key={`${plan.id}-${yearly}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="whitespace-nowrap font-display text-4xl font-bold tracking-tight xl:text-5xl">
                         {fmt.money(cents, plan.currency)}
                       </motion.span>
                     </AnimatePresence>
-                    <span className={cn("mb-2 text-sm", isFeatured ? "text-white/70" : "text-ink-muted")}>{t("/ month")}</span>
+                    <span className={cn("whitespace-nowrap text-sm", isFeatured ? "text-white/70" : "text-ink-muted")}>{t("/ month")}</span>
                   </p>
                   <p className={cn("text-xs", isFeatured ? "text-white/60" : "text-ink-muted")}>
                     {yearly ? t("{price} billed yearly", { price: fmt.money(plan.price_yearly_cents, plan.currency) }) : t("Billed monthly · cancel anytime")}
@@ -237,8 +237,11 @@ export function Packages({ plans }: { plans: Plan[] }) {
   );
 }
 
+/** Rounds a price spread over months: whole units from 10 up (1,249 rather than 1,249.17), cents below. */
+const tidy = (cents: number) => (cents >= 1000 ? Math.round(cents / 100) * 100 : Math.round(cents));
+
 /** A monthly price per month: as is, or its yearly price (10 months) spread over 12. */
-const perMonth = (monthlyCents: number, yearly: boolean) => (yearly ? Math.round((monthlyCents * 10) / 12) : monthlyCents);
+const perMonth = (monthlyCents: number, yearly: boolean) => (yearly ? tidy((monthlyCents * 10) / 12) : monthlyCents);
 
 /** The video meetings add-on and extra seats under a plan's price. */
 function PlanExtras({ plan, yearly, featured }: { plan: Plan; yearly: boolean; featured: boolean }) {
@@ -260,7 +263,7 @@ function PlanExtras({ plan, yearly, featured }: { plan: Plan; yearly: boolean; f
         ) : (
           <span>
             <span className="font-medium">{t("Video meetings add-on")}</span>{" "}
-            <span className="font-semibold">{t("+{price} / month", { price: money(plan.video_addon_cents) })}</span>
+            <span className="whitespace-nowrap font-semibold">{t("+{price} / month", { price: money(plan.video_addon_cents) })}</span>
             <span className={cn("block text-xs", muted)}>{t("Free during the 14-day trial")}</span>
           </span>
         )}
