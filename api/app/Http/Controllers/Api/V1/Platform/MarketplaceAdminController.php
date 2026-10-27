@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\CourseAccess;
 use App\Models\Order;
+use App\Services\Commission;
+use App\Services\Currencies;
 use App\Services\Marketplace;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,18 +20,31 @@ class MarketplaceAdminController extends Controller
 {
     public function __construct(private Marketplace $marketplace) {}
 
-    public function index(): JsonResponse
+    public function index(Currencies $currencies, Commission $commission): JsonResponse
     {
         $paid = Order::where('status', 'paid');
-        $gross = (int) (clone $paid)->sum('total_cents');
-        $fee = config('services.payments.platform_fee_percent');
+
+        // Sales come in many currencies; totals are in the base currency, and Manara's
+        // share uses the commission each sale was ordered with.
+        $base = $currencies->base();
+        $gross = 0;
+        $platform = 0;
+        foreach ((clone $paid)->with('items:id,order_id,price_cents,commission_percent')->get(['id', 'currency']) as $order) {
+            foreach ($order->items as $item) {
+                $amount = $currencies->convert($item->price_cents, $order->currency, $base);
+                $gross += $amount;
+                $platform += (int) round($amount * ($item->commission_percent ?? $commission->default()) / 100);
+            }
+        }
 
         $courses = $this->marketplace->courses()->where('is_public', true)->orderByDesc('accesses_count')->limit(50)->get();
 
         return response()->json([
+            'currency' => $base,
             'gross_cents' => $gross,
-            'platform_fee_percent' => $fee,
-            'platform_revenue_cents' => (int) round($gross * $fee / 100),
+            // The average share kept across all sales (rates differ by package and country).
+            'platform_fee_percent' => $gross > 0 ? (int) round($platform / $gross * 100) : $commission->default(),
+            'platform_revenue_cents' => $platform,
             'orders' => (clone $paid)->count(),
             'learners' => CourseAccess::distinct('user_id')->count('user_id'),
             'published' => Course::withoutGlobalScopes()->whereNull('deleted_at')->onMarketplace()->count(),

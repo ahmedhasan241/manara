@@ -79,6 +79,8 @@ class PlanAdminController extends Controller
             'extra_student_cents' => ['sometimes', 'integer', 'min:0'],
             'extra_staff_cents' => ['sometimes', 'integer', 'min:0'],
             'video_addon_cents' => ['nullable', 'integer', 'min:0'],
+            // Share of course sales Manara keeps from sellers on this plan (empty: the default rate).
+            'commission_percent' => ['nullable', 'integer', 'min:0', 'max:100'],
             'currency' => ['sometimes', 'string', 'size:3'],
             'max_students' => ['nullable', 'integer', 'min:1'],
             'max_staff' => ['nullable', 'integer', 'min:1'],
@@ -102,6 +104,7 @@ class PlanAdminController extends Controller
             'prices.*.extra_student_cents' => ['sometimes', 'integer', 'min:0'],
             'prices.*.extra_staff_cents' => ['sometimes', 'integer', 'min:0'],
             'prices.*.video_addon_cents' => ['nullable', 'integer', 'min:0'],
+            'prices.*.commission_percent' => ['nullable', 'integer', 'min:0', 'max:100'],
             // What the plan includes in that country; empty uses the plan's own allowance.
             'prices.*.max_students' => ['nullable', 'integer', 'min:1'],
             'prices.*.max_staff' => ['nullable', 'integer', 'min:1'],

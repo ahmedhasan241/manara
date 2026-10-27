@@ -35,7 +35,9 @@ return [
      */
     'payments' => [
         'driver' => env('PAYMENTS_DRIVER', 'test'),
-        'platform_fee_percent' => (int) env('PLATFORM_FEE_PERCENT', 20),
+        // Share of a course sale Manara keeps when the seller's package doesn't set
+        // one (or the seller has no active package); packages set their own per country.
+        'platform_fee_percent' => (int) env('PLATFORM_FEE_PERCENT', 30),
     ],
 
     'video' => [

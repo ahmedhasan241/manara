@@ -9,12 +9,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * One course in an order, with the price paid at the time.
  */
-#[Fillable(['order_id', 'course_id', 'tenant_id', 'title', 'price_cents', 'list_price_cents'])]
+#[Fillable(['order_id', 'course_id', 'tenant_id', 'title', 'price_cents', 'list_price_cents', 'commission_percent'])]
 class OrderItem extends Model
 {
     protected function casts(): array
     {
-        return ['price_cents' => 'integer'];
+        return ['price_cents' => 'integer', 'commission_percent' => 'integer'];
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Currencies;
 use Database\Factories\TenantFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -32,6 +33,14 @@ class Tenant extends Model
     public function isActive(): bool
     {
         return $this->status === 'active';
+    }
+
+    /**
+     * The workspace's own currency (from its country), for pricing its courses.
+     */
+    public function currency(): string
+    {
+        return app(Currencies::class)->forCountry($this->country);
     }
 
     public function requiresMfa(): bool

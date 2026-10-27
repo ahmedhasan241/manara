@@ -62,15 +62,29 @@ class PlanPricing
     }
 
     /**
+     * The share of course sales Manara keeps from a seller on this plan in this country.
+     */
+    public function commissionFor(Plan $plan, ?string $country): int
+    {
+        return $this->localPrice($plan, $country)?->commission_percent
+            ?? $plan->commission_percent
+            ?? (int) config('services.payments.platform_fee_percent');
+    }
+
+    /**
      * The plan as shown to a visitor from this country: translated, in the
-     * local price, with what it includes there.
+     * local price, with what it includes there and its course sales commission.
      *
      * @return array<string, mixed>
      */
     public function present(Plan $plan, ?string $country): array
     {
         $price = $this->priceFor($plan, $country);
-        $presented = [...$plan->localized(), ...$price, ...$this->capacityFor($plan, $country), 'price_country' => $price['country']];
+        $presented = [
+            ...$plan->localized(), ...$price, ...$this->capacityFor($plan, $country),
+            'commission_percent' => $this->commissionFor($plan, $country),
+            'price_country' => $price['country'],
+        ];
         unset($presented['country'], $presented['prices']);
 
         return $presented;

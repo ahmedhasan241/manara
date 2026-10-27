@@ -20,6 +20,18 @@ return [
 
     'cache_hours' => 12,
 
+    // Each country's own currency (for pricing courses in the seller's currency).
+    // Countries not listed use the base currency.
+    'countries' => [
+        'US' => 'USD', 'GB' => 'GBP', 'EG' => 'EGP', 'SA' => 'SAR', 'AE' => 'AED', 'KW' => 'KWD', 'QA' => 'QAR',
+        'BH' => 'BHD', 'OM' => 'OMR', 'JO' => 'JOD', 'LB' => 'LBP', 'IQ' => 'IQD', 'MA' => 'MAD', 'DZ' => 'DZD',
+        'TN' => 'TND', 'LY' => 'LYD', 'SD' => 'SDG', 'TR' => 'TRY', 'IN' => 'INR', 'PK' => 'PKR', 'CN' => 'CNY',
+        'JP' => 'JPY', 'BR' => 'BRL', 'MX' => 'MXN', 'CA' => 'CAD', 'AU' => 'AUD', 'CH' => 'CHF', 'NG' => 'NGN',
+        'ZA' => 'ZAR', 'AT' => 'EUR', 'BE' => 'EUR', 'CY' => 'EUR', 'DE' => 'EUR', 'EE' => 'EUR', 'ES' => 'EUR',
+        'FI' => 'EUR', 'FR' => 'EUR', 'GR' => 'EUR', 'HR' => 'EUR', 'IE' => 'EUR', 'IT' => 'EUR', 'LT' => 'EUR',
+        'LU' => 'EUR', 'LV' => 'EUR', 'MT' => 'EUR', 'NL' => 'EUR', 'PT' => 'EUR', 'SI' => 'EUR', 'SK' => 'EUR',
+    ],
+
     'fallback' => [
         'USD' => 1.0,
         'EUR' => 0.92,

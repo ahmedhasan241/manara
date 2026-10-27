@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Models\Course;
 use App\Models\CourseSection;
 use App\Models\Lecture;
+use App\Services\Currencies;
 use App\Services\Marketplace;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -50,7 +51,7 @@ class CurriculumController extends TenantController
             'level' => ['sometimes', Rule::in(['beginner', 'intermediate', 'advanced', 'all'])],
             'language' => ['sometimes', 'string', 'max:10'],
             'price_cents' => ['sometimes', 'integer', 'min:0', 'max:100000000'],
-            'currency' => ['sometimes', 'string', 'size:3'],
+            'currency' => ['sometimes', Rule::in(app(Currencies::class)->codes())],
             'outcomes' => ['sometimes', 'array', 'max:12'],
             'outcomes.*' => ['string', 'max:200'],
             'requirements' => ['sometimes', 'array', 'max:12'],

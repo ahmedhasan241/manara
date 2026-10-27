@@ -21,6 +21,14 @@ class Course extends Model
     /** @use HasFactory<CourseFactory> */
     use BelongsToTenant, HasFactory, HasUuids, SoftDeletes;
 
+    protected static function booted(): void
+    {
+        // New courses are priced in their workspace's own currency.
+        static::creating(function (Course $course): void {
+            $course->currency ??= Tenant::find($course->tenant_id)?->currency();
+        });
+    }
+
     protected function casts(): array
     {
         return [

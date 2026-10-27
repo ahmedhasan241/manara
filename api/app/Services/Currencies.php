@@ -32,6 +32,16 @@ class Currencies
     }
 
     /**
+     * A country's own currency when supported, else the base currency.
+     */
+    public function forCountry(?string $country): string
+    {
+        $code = config('currencies.countries.'.strtoupper((string) $country));
+
+        return $this->supports($code) ? $code : $this->base();
+    }
+
+    /**
      * Units of each currency per one unit of the base currency.
      *
      * @return array{base: string, rates: array<string, float>, updated_at: string|null, live: bool}

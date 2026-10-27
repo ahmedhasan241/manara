@@ -1,6 +1,6 @@
 {
     "teacher": {
-        "default": {"currency": "USD", "price_monthly_cents": 14900, "price_yearly_cents": 149000, "extra_student_cents": 250, "extra_staff_cents": 2500, "video_addon_cents": 7500},
+        "default": {"currency": "USD", "price_monthly_cents": 14900, "price_yearly_cents": 149000, "extra_student_cents": 250, "extra_staff_cents": 2500, "video_addon_cents": 7500, "commission_percent": 20},
         "countries": {
             "SA": {"currency": "SAR", "price_monthly_cents": 49900, "price_yearly_cents": 499000, "extra_student_cents": 1000, "extra_staff_cents": 10000, "video_addon_cents": 24900},
             "AE": {"currency": "AED", "price_monthly_cents": 49900, "price_yearly_cents": 499000, "extra_student_cents": 1000, "extra_staff_cents": 10000, "video_addon_cents": 24900},
@@ -12,7 +12,7 @@
         }
     },
     "school": {
-        "default": {"currency": "USD", "price_monthly_cents": 199900, "price_yearly_cents": 1999000, "extra_student_cents": 250, "extra_staff_cents": 2500, "video_addon_cents": 64900},
+        "default": {"currency": "USD", "price_monthly_cents": 199900, "price_yearly_cents": 1999000, "extra_student_cents": 250, "extra_staff_cents": 2500, "video_addon_cents": 64900, "commission_percent": 15},
         "countries": {
             "SA": {"currency": "SAR", "price_monthly_cents": 749900, "price_yearly_cents": 7499000, "extra_student_cents": 1000, "extra_staff_cents": 10000, "video_addon_cents": 249900},
             "AE": {"currency": "AED", "price_monthly_cents": 749900, "price_yearly_cents": 7499000, "extra_student_cents": 1000, "extra_staff_cents": 10000, "video_addon_cents": 249900},
@@ -24,7 +24,7 @@
         }
     },
     "university": {
-        "default": {"currency": "USD", "price_monthly_cents": 649900, "price_yearly_cents": 6499000, "extra_student_cents": 250, "extra_staff_cents": 2500, "video_addon_cents": 199900},
+        "default": {"currency": "USD", "price_monthly_cents": 649900, "price_yearly_cents": 6499000, "extra_student_cents": 250, "extra_staff_cents": 2500, "video_addon_cents": 199900, "commission_percent": 10},
         "countries": {
             "SA": {"currency": "SAR", "price_monthly_cents": 2499900, "price_yearly_cents": 24999000, "extra_student_cents": 1000, "extra_staff_cents": 10000, "video_addon_cents": 749900},
             "AE": {"currency": "AED", "price_monthly_cents": 2499900, "price_yearly_cents": 24999000, "extra_student_cents": 1000, "extra_staff_cents": 10000, "video_addon_cents": 749900},

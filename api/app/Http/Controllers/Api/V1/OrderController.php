@@ -7,6 +7,8 @@ use App\Models\ActivityLog;
 use App\Models\Coupon;
 use App\Models\Course;
 use App\Models\Order;
+use App\Models\Tenant;
+use App\Services\Commission;
 use App\Services\Currencies;
 use App\Services\Marketplace;
 use Illuminate\Http\JsonResponse;
@@ -21,7 +23,7 @@ use Illuminate\Validation\ValidationException;
  */
 class OrderController extends Controller
 {
-    public function __construct(private Marketplace $marketplace, private Currencies $currencies) {}
+    public function __construct(private Marketplace $marketplace, private Currencies $currencies, private Commission $commission) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -82,8 +84,15 @@ class OrderController extends Controller
                 'display_currency' => $display,
                 'exchange_rate' => $this->currencies->rate($display) / $this->currencies->rate($currency),
             ]);
+            // Each sale keeps the commission of its seller's package at the time of ordering.
+            $commissions = Tenant::whereIn('id', $paid->pluck('tenant_id')->unique())->get()
+                ->mapWithKeys(fn (Tenant $seller) => [$seller->id => $this->commission->forSeller($seller)]);
             foreach ($paid as $course) {
-                $order->items()->create(['course_id' => $course->id, 'tenant_id' => $course->tenant_id, 'title' => $course->title, 'price_cents' => $priceOf($course), 'list_price_cents' => $course->price_cents]);
+                $order->items()->create([
+                    'course_id' => $course->id, 'tenant_id' => $course->tenant_id, 'title' => $course->title,
+                    'price_cents' => $priceOf($course), 'list_price_cents' => $course->price_cents,
+                    'commission_percent' => $commissions[$course->tenant_id] ?? $this->commission->default(),
+                ]);
             }
 
             return $order;
