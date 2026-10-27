@@ -1,0 +1,38 @@
+{
+    "teacher": {
+        "default": {"currency": "USD", "price_monthly_cents": 2900, "price_yearly_cents": 29000, "extra_student_cents": 50, "extra_staff_cents": 500, "video_addon_cents": 1500},
+        "countries": {
+            "SA": {"currency": "SAR", "price_monthly_cents": 9900, "price_yearly_cents": 99000, "extra_student_cents": 200, "extra_staff_cents": 2000, "video_addon_cents": 4900},
+            "AE": {"currency": "AED", "price_monthly_cents": 9900, "price_yearly_cents": 99000, "extra_student_cents": 200, "extra_staff_cents": 2000, "video_addon_cents": 4900},
+            "QA": {"currency": "QAR", "price_monthly_cents": 9900, "price_yearly_cents": 99000, "extra_student_cents": 200, "extra_staff_cents": 2000, "video_addon_cents": 4900},
+            "KW": {"currency": "KWD", "price_monthly_cents": 800, "price_yearly_cents": 8000, "extra_student_cents": 20, "extra_staff_cents": 150, "video_addon_cents": 400},
+            "BH": {"currency": "BHD", "price_monthly_cents": 1000, "price_yearly_cents": 10000, "extra_student_cents": 20, "extra_staff_cents": 200, "video_addon_cents": 500},
+            "OM": {"currency": "OMR", "price_monthly_cents": 1000, "price_yearly_cents": 10000, "extra_student_cents": 20, "extra_staff_cents": 200, "video_addon_cents": 500},
+            "EG": {"currency": "EGP", "price_monthly_cents": 29900, "price_yearly_cents": 299000, "extra_student_cents": 500, "extra_staff_cents": 6000, "video_addon_cents": 14900}
+        }
+    },
+    "school": {
+        "default": {"currency": "USD", "price_monthly_cents": 39900, "price_yearly_cents": 399000, "extra_student_cents": 50, "extra_staff_cents": 500, "video_addon_cents": 12900},
+        "countries": {
+            "SA": {"currency": "SAR", "price_monthly_cents": 149900, "price_yearly_cents": 1499000, "extra_student_cents": 200, "extra_staff_cents": 2000, "video_addon_cents": 49900},
+            "AE": {"currency": "AED", "price_monthly_cents": 149900, "price_yearly_cents": 1499000, "extra_student_cents": 200, "extra_staff_cents": 2000, "video_addon_cents": 49900},
+            "QA": {"currency": "QAR", "price_monthly_cents": 149900, "price_yearly_cents": 1499000, "extra_student_cents": 200, "extra_staff_cents": 2000, "video_addon_cents": 49900},
+            "KW": {"currency": "KWD", "price_monthly_cents": 12500, "price_yearly_cents": 125000, "extra_student_cents": 20, "extra_staff_cents": 150, "video_addon_cents": 3900},
+            "BH": {"currency": "BHD", "price_monthly_cents": 14900, "price_yearly_cents": 149000, "extra_student_cents": 20, "extra_staff_cents": 200, "video_addon_cents": 4900},
+            "OM": {"currency": "OMR", "price_monthly_cents": 14900, "price_yearly_cents": 149000, "extra_student_cents": 20, "extra_staff_cents": 200, "video_addon_cents": 4900},
+            "EG": {"currency": "EGP", "price_monthly_cents": 399900, "price_yearly_cents": 3999000, "extra_student_cents": 500, "extra_staff_cents": 6000, "video_addon_cents": 149900}
+        }
+    },
+    "university": {
+        "default": {"currency": "USD", "price_monthly_cents": 129900, "price_yearly_cents": 1299000, "extra_student_cents": 50, "extra_staff_cents": 500, "video_addon_cents": 39900},
+        "countries": {
+            "SA": {"currency": "SAR", "price_monthly_cents": 499900, "price_yearly_cents": 4999000, "extra_student_cents": 200, "extra_staff_cents": 2000, "video_addon_cents": 149900},
+            "AE": {"currency": "AED", "price_monthly_cents": 499900, "price_yearly_cents": 4999000, "extra_student_cents": 200, "extra_staff_cents": 2000, "video_addon_cents": 149900},
+            "QA": {"currency": "QAR", "price_monthly_cents": 499900, "price_yearly_cents": 4999000, "extra_student_cents": 200, "extra_staff_cents": 2000, "video_addon_cents": 149900},
+            "KW": {"currency": "KWD", "price_monthly_cents": 39900, "price_yearly_cents": 399000, "extra_student_cents": 20, "extra_staff_cents": 150, "video_addon_cents": 12500},
+            "BH": {"currency": "BHD", "price_monthly_cents": 49900, "price_yearly_cents": 499000, "extra_student_cents": 20, "extra_staff_cents": 200, "video_addon_cents": 14900},
+            "OM": {"currency": "OMR", "price_monthly_cents": 49900, "price_yearly_cents": 499000, "extra_student_cents": 20, "extra_staff_cents": 200, "video_addon_cents": 14900},
+            "EG": {"currency": "EGP", "price_monthly_cents": 1299900, "price_yearly_cents": 12999000, "extra_student_cents": 500, "extra_staff_cents": 6000, "video_addon_cents": 499900}
+        }
+    }
+}

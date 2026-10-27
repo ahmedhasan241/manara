@@ -65,7 +65,7 @@ class MarketplaceSeeder extends Seeder
         foreach ($publishers as $publisher) {
             $tenant = Tenant::firstOrCreate(['slug' => $publisher['slug']], ['name' => $publisher['name'], 'type' => $publisher['type']]);
             if ($plan && ! $tenant->subscriptions()->exists()) {
-                $tenant->subscriptions()->create(['plan_id' => $plan->id, 'status' => 'active', 'current_period_ends_at' => now()->addMonth()]);
+                $tenant->subscriptions()->create(['plan_id' => $plan->id, 'status' => 'active', 'video_addon' => true, 'current_period_ends_at' => now()->addMonth()]);
             }
             foreach ($publisher['instructors'] as $i => [$name, $email]) {
                 $user = User::firstOrCreate(['email' => $email], ['name' => $name, 'password' => 'password']);

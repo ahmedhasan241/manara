@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Course;
 use App\Models\LiveLesson;
+use App\Services\Entitlements;
 use App\Services\LiveLessons;
 use App\Services\Video\VideoProviders;
 use Illuminate\Http\JsonResponse;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Gate;
 
 class LiveLessonController extends TenantController
 {
-    public function __construct(private LiveLessons $lessons, private VideoProviders $providers) {}
+    public function __construct(private LiveLessons $lessons, private VideoProviders $providers, private Entitlements $entitlements) {}
 
     /**
      * A course's lessons: upcoming and live first, then past ones with recordings.
@@ -75,6 +76,7 @@ class LiveLessonController extends TenantController
     public function store(Request $request, Course $course): JsonResponse
     {
         Gate::authorize('courses.manage');
+        $this->entitlements->ensureVideoMeetings($this->tenant());
 
         $lesson = $this->lessons->schedule($course, $this->validated($request), $request->user());
 
@@ -104,6 +106,7 @@ class LiveLessonController extends TenantController
     {
         Gate::authorize('courses.manage');
         abort_unless(in_array($lesson->status, ['scheduled', 'live'], true), 422, __('This lesson can no longer be started.'));
+        $this->entitlements->ensureVideoMeetings($this->tenant());
 
         $this->lessons->markStarted($lesson);
 

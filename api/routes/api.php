@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\AnnouncementController;
 use App\Http\Controllers\Api\V1\AssessmentController;
 use App\Http\Controllers\Api\V1\AttendanceController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\BillingController;
 use App\Http\Controllers\Api\V1\CalendarController;
 use App\Http\Controllers\Api\V1\CatalogController;
 use App\Http\Controllers\Api\V1\CertificateController;
@@ -136,6 +137,8 @@ Route::prefix('v1')->name('v1.')->group(function () {
             Route::get('workspace', [WorkspaceController::class, 'show'])->name('workspace.show');
             Route::patch('workspace', [WorkspaceController::class, 'update'])->name('workspace.update');
             Route::get('workspace/activity', [WorkspaceController::class, 'activity'])->name('workspace.activity');
+            Route::get('billing', [BillingController::class, 'show'])->name('billing.show');
+            Route::patch('billing', [BillingController::class, 'update'])->name('billing.update');
 
             Route::post('members/bulk', [MemberController::class, 'bulk'])->name('members.bulk');
             Route::apiResource('members', MemberController::class)->parameters(['members' => 'membership'])->except('show');

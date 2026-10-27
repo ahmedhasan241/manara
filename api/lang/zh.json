@@ -78,5 +78,12 @@
     "(and :count more errors)": "（还有 :count 个错误）",
     "That code is already taken. Try another one.": "该代码已被使用，请换一个。",
     "This code is not valid or has expired.": "该优惠码无效或已过期。",
-    "This code doesn’t apply to the courses in your cart.": "该优惠码不适用于购物车中的课程。"
+    "This code doesn’t apply to the courses in your cart.": "该优惠码不适用于购物车中的课程。",
+    "Your package has room for :limit students (:used in use). Add student seats or upgrade your package.": "您的套餐可容纳 :limit 名学生（已使用 :used）。请增加学生席位或升级套餐。",
+    "Your package has room for :limit staff members (:used in use). Add staff seats or upgrade your package.": "您的套餐可容纳 :limit 名教职员工（已使用 :used）。请增加员工席位或升级套餐。",
+    "Video meetings are an add-on. Add it to your package to schedule and start live lessons.": "视频会议是付费附加功能。将其添加到您的套餐即可安排和开始直播课。",
+    "You already have :used :kind; the new package would allow :limit.": "您已有 :used 名:kind；新套餐仅允许 :limit 名。",
+    "students": "学生",
+    "staff": "教职员工",
+    "This workspace has no package yet.": "此工作区尚无套餐。"
 }

@@ -73,7 +73,7 @@ class AcademicSeeder extends Seeder
             'site' => ['tagline' => 'Engineering the future.', 'about' => 'A private university with faculties of engineering, business and computer science.'],
         ]);
         if ($plan = Plan::where('code', 'university')->first()) {
-            $tenant->subscriptions()->create(['plan_id' => $plan->id, 'status' => 'active', 'current_period_ends_at' => now()->addMonth()]);
+            $tenant->subscriptions()->create(['plan_id' => $plan->id, 'status' => 'active', 'video_addon' => true, 'current_period_ends_at' => now()->addMonth()]);
         }
 
         TenantFactory::addMember($tenant, Role::Owner, User::factory()->create(['name' => 'Dean Nadia Farouk', 'email' => 'dean@nile.test']));

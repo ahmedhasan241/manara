@@ -24,12 +24,17 @@ class StatsController extends Controller
             ->with('plan:id,price_monthly_cents,price_yearly_cents,currency')
             ->get();
 
-        // Plans may be priced in different currencies; revenue is reported in the base currency.
-        $mrrCents = $current->where('status', 'active')->sum(fn (Subscription $s) => $currencies->convert(
-            $s->interval === 'yearly' ? intdiv($s->plan->price_yearly_cents, 12) : $s->plan->price_monthly_cents,
-            $s->plan->currency,
-            $currencies->base(),
-        ));
+        // Each subscription's agreed price (with seats and add-ons) where known, else its plan's
+        // default price. Prices come in many currencies; revenue is reported in the base currency.
+        $mrrCents = $current->where('status', 'active')->sum(function (Subscription $s) use ($currencies): int {
+            $amount = $s->amount_cents ?? ($s->interval === 'yearly' ? $s->plan->price_yearly_cents : $s->plan->price_monthly_cents);
+
+            return $currencies->convert(
+                $s->interval === 'yearly' ? intdiv($amount, 12) : $amount,
+                $s->amount_cents !== null ? $s->currency : $s->plan->currency,
+                $currencies->base(),
+            );
+        });
 
         $signups = Tenant::query()
             ->where('created_at', '>=', now()->subDays(30)->startOfDay())

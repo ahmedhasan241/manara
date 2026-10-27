@@ -26,10 +26,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $plans = collect([
-            ['code' => 'teacher', 'name' => 'Teacher', 'description' => 'For one educator and their classes.', 'price_monthly_cents' => 9900, 'price_yearly_cents' => 99000, 'currency' => 'SAR', 'max_students' => 150, 'max_staff' => 1, 'storage_gb' => 10, 'features' => ['Gradebook', 'Attendance', 'Course materials', 'Announcements', 'Mobile app'], 'sort_order' => 1],
-            ['code' => 'school', 'name' => 'School', 'description' => 'For schools with many teachers.', 'price_monthly_cents' => 149900, 'price_yearly_cents' => 1499000, 'currency' => 'SAR', 'max_students' => 1500, 'max_staff' => 120, 'storage_gb' => 200, 'features' => ['Everything in Teacher', 'Parent accounts', 'Public school website', 'Reports and exports', 'Required MFA'], 'sort_order' => 2],
-            ['code' => 'university', 'name' => 'University', 'description' => 'For universities and large institutions.', 'price_monthly_cents' => 499900, 'price_yearly_cents' => 4999000, 'currency' => 'SAR', 'max_students' => null, 'max_staff' => null, 'storage_gb' => 2000, 'features' => ['Everything in School', 'Custom domain', 'SSO', 'Dedicated support', 'Data residency'], 'sort_order' => 3],
-        ])->map(fn (array $plan) => Plan::updateOrCreate(['code' => $plan['code']], [...$plan, 'translations' => Plan::defaultTranslations($plan['code'])]));
+            ['code' => 'teacher', 'name' => 'Teacher', 'description' => 'For one educator and their classes.', 'max_students' => 150, 'max_staff' => 1, 'storage_gb' => 10, 'features' => ['Gradebook', 'Attendance', 'Course materials', 'Announcements', 'Mobile app'], 'sort_order' => 1],
+            ['code' => 'school', 'name' => 'School', 'description' => 'For schools with many teachers.', 'max_students' => 1500, 'max_staff' => 120, 'storage_gb' => 200, 'features' => ['Everything in Teacher', 'Parent accounts', 'Public school website', 'Reports and exports', 'Required MFA'], 'sort_order' => 2],
+            ['code' => 'university', 'name' => 'University', 'description' => 'For universities and large institutions.', 'max_students' => null, 'max_staff' => null, 'storage_gb' => 2000, 'features' => ['Everything in School', 'Custom domain', 'SSO', 'Dedicated support', 'Data residency'], 'sort_order' => 3],
+        ])->map(fn (array $plan) => tap(Plan::updateOrCreate(['code' => $plan['code']], [...$plan, 'translations' => Plan::defaultTranslations($plan['code'])]))->applyDefaultPricing());
 
         User::factory()->create([
             'name' => 'Platform Admin',
@@ -52,7 +52,7 @@ class DatabaseSeeder extends Seeder
                 ],
             ],
         ]);
-        $tenant->subscriptions()->create(['plan_id' => $plans[1]->id, 'status' => 'active', 'current_period_ends_at' => now()->addMonth()]);
+        $tenant->subscriptions()->create(['plan_id' => $plans[1]->id, 'status' => 'active', 'video_addon' => true, 'current_period_ends_at' => now()->addMonth()]);
 
         TenantFactory::addMember($tenant, Role::Owner, User::factory()->create(['name' => 'Olivia Owner', 'email' => 'owner@greenwood.test']));
         $teacher = TenantFactory::addMember($tenant, Role::Teacher, User::factory()->create(['name' => 'Tom Teacher', 'email' => 'teacher@greenwood.test']));

@@ -8,6 +8,7 @@ use App\Models\Course;
 use App\Models\Guardianship;
 use App\Models\Membership;
 use App\Models\User;
+use App\Services\Entitlements;
 use App\Services\Marketplace;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,6 +21,8 @@ use Illuminate\Validation\Rule;
 
 class MemberController extends TenantController
 {
+    public function __construct(private Entitlements $entitlements) {}
+
     public function index(Request $request): LengthAwarePaginator
     {
         Gate::authorize('courses.manage');
@@ -49,6 +52,11 @@ class MemberController extends TenantController
             'children.*' => ['integer', Rule::exists('memberships', 'user_id')->where('tenant_id', $this->tenant()->id)->where('role', Role::Student->value)],
             'relationship' => ['nullable', 'string', 'max:40'],
         ]);
+
+        $existing = Membership::query()->whereHas('user', fn ($q) => $q->where('email', strtolower($data['email'])))->first();
+        if ($existing?->role->value !== $data['role']) {
+            $this->entitlements->ensureSeatsFor($this->tenant(), Role::from($data['role']));
+        }
 
         $membership = DB::transaction(function () use ($data) {
             $user = User::firstOrCreate(
@@ -97,6 +105,10 @@ class MemberController extends TenantController
             'course_id' => ['nullable', 'uuid', Rule::exists('courses', 'id')->where('tenant_id', $this->tenant()->id)],
         ]);
 
+        $emails = collect($data['people'])->map(fn (array $person) => strtolower($person['email']))->unique();
+        $alreadyMembers = Membership::query()->whereHas('user', fn ($q) => $q->whereIn('email', $emails))->count();
+        $this->entitlements->ensureSeatsFor($this->tenant(), Role::from($data['role']), $emails->count() - $alreadyMembers);
+
         $added = 0;
         $existing = 0;
         DB::transaction(function () use ($data, &$added, &$existing): void {
@@ -135,10 +147,16 @@ class MemberController extends TenantController
         Gate::authorize('members.manage');
         abort_if($membership->role === Role::Owner, 422, __('The owner role cannot be changed here.'));
 
-        $membership->update($request->validate([
+        $data = $request->validate([
             'role' => ['sometimes', Rule::enum(Role::class)->except([Role::Owner])],
             'student_number' => ['nullable', 'string', 'max:60'],
-        ]));
+        ]);
+        $newRole = isset($data['role']) ? Role::from($data['role']) : null;
+        if ($newRole !== null && Entitlements::seatKind($newRole) !== Entitlements::seatKind($membership->role)) {
+            $this->entitlements->ensureSeatsFor($this->tenant(), $newRole);
+        }
+
+        $membership->update($data);
 
         ActivityLog::record('member.updated', $membership, $membership->getChanges());
 

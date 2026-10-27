@@ -10,6 +10,7 @@ use App\Models\Membership;
 use App\Models\Plan;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\PlanPricing;
 use App\Support\Countries;
 use App\Support\Totp;
 use Illuminate\Contracts\Encryption\DecryptException;
@@ -33,7 +34,7 @@ class AuthController extends Controller
     /**
      * Sign-up from the marketing site: creates the workspace, its owner and a trial.
      */
-    public function registerWorkspace(Request $request): JsonResponse
+    public function registerWorkspace(Request $request, PlanPricing $pricing): JsonResponse
     {
         $request->merge(Countries::normalize($request->only('country')));
         $data = $request->validate([
@@ -44,11 +45,13 @@ class AuthController extends Controller
             'workspace_slug' => ['required', 'alpha_dash:ascii', 'min:3', 'max:40', 'unique:tenants,slug', Rule::notIn(['www', 'api', 'admin', 'app'])],
             'workspace_type' => ['required', Rule::in(Tenant::TYPES)],
             'plan' => ['nullable', 'exists:plans,code'],
+            'interval' => ['nullable', Rule::in(['monthly', 'yearly'])],
+            'video_addon' => ['nullable', 'boolean'],
             'device_name' => ['nullable', 'string', 'max:100'],
             ...Countries::locationRules(),
         ]);
 
-        [$user, $tenant] = DB::transaction(function () use ($data): array {
+        [$user, $tenant] = DB::transaction(function () use ($data, $pricing): array {
             $user = User::create([
                 'name' => $data['name'],
                 'email' => strtolower($data['email']),
@@ -68,11 +71,15 @@ class AuthController extends Controller
             $plan = Plan::where('code', $data['plan'] ?? null)->first()
                 ?? Plan::where('is_active', true)->orderBy('sort_order')->firstOrFail();
 
-            $tenant->subscriptions()->create([
+            $subscription = $tenant->subscriptions()->make([
                 'plan_id' => $plan->id,
                 'status' => 'trialing',
+                'interval' => $data['interval'] ?? 'monthly',
+                'video_addon' => (bool) ($data['video_addon'] ?? false),
                 'trial_ends_at' => now()->addDays(self::TRIAL_DAYS),
             ]);
+            $pricing->price($subscription->setRelation('plan', $plan), $tenant->country);
+            $subscription->save();
 
             return [$user, $tenant];
         });

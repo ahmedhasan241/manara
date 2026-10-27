@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['code', 'name', 'description', 'price_monthly_cents', 'price_yearly_cents', 'currency', 'max_students', 'max_staff', 'storage_gb', 'features', 'translations', 'is_active', 'sort_order'])]
+#[Fillable(['code', 'name', 'description', 'price_monthly_cents', 'price_yearly_cents', 'extra_student_cents', 'extra_staff_cents', 'video_addon_cents', 'currency', 'max_students', 'max_staff', 'storage_gb', 'features', 'translations', 'is_active', 'sort_order'])]
 class Plan extends Model
 {
     /** @use HasFactory<PlanFactory> */
@@ -36,6 +36,43 @@ class Plan extends Model
     }
 
     /**
+     * Built-in prices for the standard plans (database/data): a default price
+     * and one per country.
+     *
+     * @return array{default: array<string, mixed>, countries: array<string, array<string, mixed>>}|null
+     */
+    public static function defaultPricing(string $code): ?array
+    {
+        $all = json_decode((string) file_get_contents(database_path('data/plan-pricing.json')), true);
+
+        return $all[$code] ?? null;
+    }
+
+    /**
+     * Sets the built-in default and country prices on a standard plan.
+     */
+    public function applyDefaultPricing(): void
+    {
+        $pricing = self::defaultPricing($this->code);
+        if ($pricing === null) {
+            return;
+        }
+
+        $this->forceFill($pricing['default'])->save();
+        foreach ($pricing['countries'] as $country => $price) {
+            $this->prices()->updateOrCreate(['country' => $country], $price);
+        }
+    }
+
+    /**
+     * Whether video meetings are sold separately on this plan (otherwise included).
+     */
+    public function sellsVideoAddon(): bool
+    {
+        return $this->video_addon_cents !== null;
+    }
+
+    /**
      * The plan as shown to visitors: name, description and features in the
      * request's language when translated (English otherwise).
      *
@@ -54,6 +91,14 @@ class Plan extends Model
         unset($plan['translations']);
 
         return $plan;
+    }
+
+    /**
+     * @return HasMany<PlanPrice, $this>
+     */
+    public function prices(): HasMany
+    {
+        return $this->hasMany(PlanPrice::class);
     }
 
     /**

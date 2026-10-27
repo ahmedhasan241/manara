@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Plan;
 use App\Models\Tenant;
+use App\Services\PlanPricing;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -67,19 +68,28 @@ class TenantAdminController extends Controller
     /**
      * Moves a workspace to another plan (manual billing or support override).
      */
-    public function changePlan(Request $request, Tenant $tenant): JsonResponse
+    public function changePlan(Request $request, Tenant $tenant, PlanPricing $pricing): JsonResponse
     {
         $data = $request->validate([
             'plan_id' => ['required', 'exists:plans,id'],
             'status' => ['required', Rule::in(['trialing', 'active', 'past_due', 'canceled'])],
             'interval' => ['sometimes', Rule::in(['monthly', 'yearly'])],
+            'extra_students' => ['sometimes', 'integer', 'min:0', 'max:100000'],
+            'extra_staff' => ['sometimes', 'integer', 'min:0', 'max:10000'],
+            'video_addon' => ['sometimes', 'boolean'],
             'current_period_ends_at' => ['nullable', 'date'],
         ]);
 
-        $subscription = $tenant->subscriptions()->create([
+        // Seats and add-ons carry over from the current subscription unless changed.
+        $previous = $tenant->subscription;
+        $subscription = $tenant->subscriptions()->make([
+            'extra_students' => $previous->extra_students ?? 0,
+            'extra_staff' => $previous->extra_staff ?? 0,
+            'video_addon' => $previous->video_addon ?? false,
             ...$data,
-            'plan_id' => Plan::findOrFail($data['plan_id'])->id,
         ]);
+        $pricing->price($subscription->setRelation('plan', Plan::findOrFail($data['plan_id'])), $tenant->country);
+        $subscription->save();
         ActivityLog::record('platform.subscription.changed', $tenant, $data);
 
         return response()->json($subscription->load('plan'), 201);

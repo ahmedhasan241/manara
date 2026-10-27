@@ -78,5 +78,12 @@
     "(and :count more errors)": "(و:count أخطاء أخرى)",
     "That code is already taken. Try another one.": "هذا الرمز مستخدم بالفعل. جرّب رمزًا آخر.",
     "This code is not valid or has expired.": "هذا الرمز غير صالح أو منتهي الصلاحية.",
-    "This code doesn’t apply to the courses in your cart.": "هذا الرمز لا ينطبق على الدورات في سلتك."
+    "This code doesn’t apply to the courses in your cart.": "هذا الرمز لا ينطبق على الدورات في سلتك.",
+    "Your package has room for :limit students (:used in use). Add student seats or upgrade your package.": "تتسع باقتك لـ :limit طالبًا (المستخدم حاليًا :used). أضف مقاعد طلاب أو رقِّ باقتك.",
+    "Your package has room for :limit staff members (:used in use). Add staff seats or upgrade your package.": "تتسع باقتك لـ :limit من الموظفين (المستخدم حاليًا :used). أضف مقاعد موظفين أو رقِّ باقتك.",
+    "Video meetings are an add-on. Add it to your package to schedule and start live lessons.": "الاجتماعات المرئية إضافة مدفوعة. أضفها إلى باقتك لجدولة الحصص المباشرة وبدئها.",
+    "You already have :used :kind; the new package would allow :limit.": "لديك بالفعل :used من :kind، والباقة الجديدة تسمح بـ :limit فقط.",
+    "students": "الطلاب",
+    "staff": "الموظفين",
+    "This workspace has no package yet.": "لا توجد باقة لهذه المساحة بعد."
 }

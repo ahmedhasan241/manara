@@ -78,5 +78,12 @@
     "(and :count more errors)": "(y :count errores más)",
     "That code is already taken. Try another one.": "Ese código ya existe. Prueba con otro.",
     "This code is not valid or has expired.": "Este código no es válido o ha caducado.",
-    "This code doesn’t apply to the courses in your cart.": "Este código no se aplica a los cursos de tu carrito."
+    "This code doesn’t apply to the courses in your cart.": "Este código no se aplica a los cursos de tu carrito.",
+    "Your package has room for :limit students (:used in use). Add student seats or upgrade your package.": "Tu paquete admite :limit estudiantes (:used en uso). Añade plazas de estudiantes o mejora tu paquete.",
+    "Your package has room for :limit staff members (:used in use). Add staff seats or upgrade your package.": "Tu paquete admite :limit miembros del personal (:used en uso). Añade plazas de personal o mejora tu paquete.",
+    "Video meetings are an add-on. Add it to your package to schedule and start live lessons.": "Las videoreuniones son un complemento de pago. Añádelo a tu paquete para programar e iniciar clases en directo.",
+    "You already have :used :kind; the new package would allow :limit.": "Ya tienes :used :kind; el nuevo paquete permitiría :limit.",
+    "students": "estudiantes",
+    "staff": "miembros del personal",
+    "This workspace has no package yet.": "Este espacio aún no tiene un paquete."
 }

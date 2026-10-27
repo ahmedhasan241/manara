@@ -8,7 +8,9 @@ use App\Models\Plan;
 use App\Models\SiteContent;
 use App\Models\Tenant;
 use App\Services\Currencies;
+use App\Services\PlanPricing;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 /**
  * Unauthenticated endpoints for the marketing site and subscriber websites.
@@ -23,20 +25,35 @@ class PublicController extends Controller
         return response()->json($currencies->rates());
     }
 
-    public function plans(): JsonResponse
+    /**
+     * Active plans, translated and priced for the visitor's country.
+     */
+    public function plans(Request $request, PlanPricing $pricing): JsonResponse
     {
-        return response()->json(Plan::where('is_active', true)->orderBy('sort_order')->get()->map->localized());
+        return response()->json($this->publicPlans($request, $pricing));
     }
 
     /**
      * Everything the product website shows, in one call.
      */
-    public function marketing(): JsonResponse
+    public function marketing(Request $request, PlanPricing $pricing): JsonResponse
     {
         return response()->json([
             ...SiteContent::allSections(),
-            'plans' => Plan::where('is_active', true)->orderBy('sort_order')->get()->map->localized(),
+            'plans' => $this->publicPlans($request, $pricing),
         ]);
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function publicPlans(Request $request, PlanPricing $pricing): array
+    {
+        $country = $pricing->countryFrom($request);
+
+        return Plan::with('prices')->where('is_active', true)->orderBy('sort_order')->get()
+            ->map(fn (Plan $plan) => $pricing->present($plan, $country))
+            ->all();
     }
 
     public function site(string $slug): JsonResponse
